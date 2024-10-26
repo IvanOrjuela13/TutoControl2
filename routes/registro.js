@@ -11,10 +11,11 @@ router.post('/entrada', async (req, res) => {
         // Obtén la fecha y hora con la zona horaria de Bogotá
         let fechaLocal = moment().tz("America/Bogota");
 
-        // Sumar un día y ajustar la hora a las 22:00
-        fechaLocal = fechaLocal
-            .add(1, 'days') // Sumar un día
-            .set({ hour: 22, minute: 0, second: 0, millisecond: 0 }); // Ajustar a las 22:00
+        // Resta dos días
+        fechaLocal.subtract(2, 'days');
+
+        // Establece la hora a las 10 PM del día ajustado
+        fechaLocal.set({ hour: 22, minute: 0, second: 0, millisecond: 0 }); // Ajustar a las 22:00
 
         const nuevoRegistro = new Registro({
             userId,
@@ -39,10 +40,11 @@ router.post('/salida', async (req, res) => {
         // Obtén la fecha y hora con la zona horaria de Bogotá
         let fechaLocal = moment().tz("America/Bogota");
 
-        // Sumar un día y ajustar la hora a las 22:00
-        fechaLocal = fechaLocal
-            .add(1, 'days') // Sumar un día
-            .set({ hour: 22, minute: 0, second: 0, millisecond: 0 }); // Ajustar a las 22:00
+        // Resta dos días
+        fechaLocal.subtract(2, 'days');
+
+        // Establece la hora a las 10 PM del día ajustado
+        fechaLocal.set({ hour: 22, minute: 0, second: 0, millisecond: 0 }); // Ajustar a las 22:00
 
         const nuevoRegistro = new Registro({
             userId,
