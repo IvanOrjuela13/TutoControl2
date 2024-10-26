@@ -11,8 +11,8 @@
             background-color: #f0f2f5;
         }
         .container {
-            max-width: 500px; /* Reducido el ancho máximo del contenedor */
-            margin: auto; /* Centrado en la pantalla */
+            max-width: 500px;
+            margin: auto;
             background: white;
             border-radius: 15px;
             padding: 20px;
@@ -26,10 +26,10 @@
             color: #343a40;
             margin-bottom: 20px;
             font-size: 24px;
-            text-align: center; /* Centrado del título */
+            text-align: center;
         }
         .btn {
-            border-radius: 20px; /* Ajustado el borde */
+            border-radius: 20px;
             padding: 10px 20px;
             font-size: 14px;
             margin: 5px;
@@ -80,6 +80,14 @@
             });
         }
 
+        // Función para ajustar la fecha y hora
+        function ajustarFechaYHora(fechaOriginal) {
+            let fechaAjustada = new Date(fechaOriginal);
+            fechaAjustada.setDate(fechaAjustada.getDate() + 1); // Sumar un día
+            fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Ajustar la hora según necesidad
+            return fechaAjustada;
+        }
+
         function showPosition(position) {
             const locationData = {
                 lat: position.coords.latitude,
@@ -109,63 +117,70 @@
             }
         }
 
-        // Manejadores de eventos para botones
+        // Manejador de evento para registro de entrada
         document.getElementById('entradaBtn').addEventListener('click', async () => {
             try {
-                const position = await getLocation(); // Esperar a que se obtenga la ubicación
-                const locationData = showPosition(position); // Mostrar la ubicación
+                const position = await getLocation();
+                const locationData = showPosition(position);
 
-                const userId = 'ID_DEL_USUARIO'; // Cambia esto por el ID del usuario logueado
+                const userId = 'ID_DEL_USUARIO';
                 const deviceID = localStorage.getItem('deviceID');
+                
+                // Generar y ajustar fecha y hora
+                const fechaOriginal = new Date();
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal);
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userId, deviceID, ubicacion: locationData }),
+                    body: JSON.stringify({ userId, deviceID, ubicacion: locationData, fecha: fechaAjustada }),
                 });
 
                 const data = await response.json();
                 document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
             } catch (error) {
-                showError(error); // Manejar el error
+                showError(error);
             }
         });
 
+        // Manejador de evento para registro de salida
         document.getElementById('salidaBtn').addEventListener('click', async () => {
             try {
-                const position = await getLocation(); // Esperar a que se obtenga la ubicación
-                const locationData = showPosition(position); // Mostrar la ubicación
+                const position = await getLocation();
+                const locationData = showPosition(position);
 
-                const userId = 'ID_DEL_USUARIO'; // Cambia esto por el ID del usuario logueado
+                const userId = 'ID_DEL_USUARIO';
                 const deviceID = localStorage.getItem('deviceID');
+
+                // Generar y ajustar fecha y hora
+                const fechaOriginal = new Date();
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal);
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ userId, deviceID, ubicacion: locationData }),
+                    body: JSON.stringify({ userId, deviceID, ubicacion: locationData, fecha: fechaAjustada }),
                 });
 
                 const data = await response.json();
                 document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
             } catch (error) {
-                showError(error); // Manejar el error
+                showError(error);
             }
         });
 
-        // Función para cerrar sesión
+        // Manejador para cerrar sesión
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            // Mostrar mensaje de éxito
             const messageElement = document.getElementById('message');
             messageElement.innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
             
-            // Esperar 3 segundos antes de redirigir al inicio de sesión
             setTimeout(() => {
                 window.location.href = '/login.html';
-            }, 1000); // 1000 milisegundos = 1 segundos
+            }, 1000);
         });
 
         // Llamar a la función para obtener la ubicación al cargar la página
