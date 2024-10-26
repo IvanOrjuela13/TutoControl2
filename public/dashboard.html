@@ -84,7 +84,7 @@
         function ajustarFechaYHora(fechaOriginal) {
             let fechaAjustada = new Date(fechaOriginal);
             fechaAjustada.setDate(fechaAjustada.getDate() + 1); // Sumar un día
-            fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Ajustar la hora según necesidad
+            fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Sumar 12 horas
             return fechaAjustada;
         }
 
