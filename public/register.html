@@ -17,6 +17,7 @@
             <div class="form-group">
                 <label for="password">Contraseña:</label>
                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
+                <small class="form-text text-muted">La contraseña debe tener al menos 10 caracteres, una letra mayúscula, una minúscula y un número.</small>
             </div>
             <button type="submit" class="btn btn-primary">Registrarse</button>
         </form>
@@ -30,11 +31,27 @@
         const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
         localStorage.setItem('deviceID', deviceID);
 
+        // Validación de contraseña segura
+        function isPasswordSecure(password) {
+            const minLength = 10;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+
+            return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber;
+        }
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+
+            if (!isPasswordSecure(password)) {
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerHTML = `<div class="alert alert-danger">La contraseña no cumple con los requisitos de seguridad.</div>`;
+                return;
+            }
 
             try {
                 const response = await fetch('/api/auth/register', {
@@ -42,7 +59,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, deviceID }), // Envía el deviceID
+                    body: JSON.stringify({ username, password, deviceID }),
                 });
 
                 const data = await response.json();
