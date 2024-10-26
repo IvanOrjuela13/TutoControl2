@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+public/dashboard.html <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -80,12 +80,12 @@
             });
         }
 
-        // Función para sumar un día y 12 horas a la fecha
-        function sumarTiempo(fecha) {
-            const nuevaFecha = new Date(fecha);
-            nuevaFecha.setDate(nuevaFecha.getDate() + 1); // Sumar un día
-            nuevaFecha.setHours(nuevaFecha.getHours() + 12); // Sumar 12 horas
-            return nuevaFecha.toISOString(); // Devuelve la fecha en un formato estándar
+        // Función para ajustar la fecha y hora
+        function ajustarFechaYHora(fechaOriginal) {
+            let fechaAjustada = new Date(fechaOriginal);
+            fechaAjustada.setDate(fechaAjustada.getDate() + 1); // Sumar un día
+            fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Sumar 12 horas
+            return fechaAjustada.toISOString(); // Convertir a formato ISO 8601
         }
 
         function showPosition(position) {
@@ -123,13 +123,12 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                // Obtiene el ID del usuario y deviceID
-                const userId = localStorage.getItem('userId'); // Asegúrate de haberlo guardado al iniciar sesión
-                const deviceID = localStorage.getItem('deviceID'); // Asegúrate de haberlo guardado al iniciar sesión
+                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
+                const deviceID = localStorage.getItem('deviceID');
 
-                // Genera la fecha y hora actual y suma un día y 12 horas
-                const fechaActual = new Date();
-                const fechaAjustada = sumarTiempo(fechaActual);
+                // Generar y ajustar fecha y hora
+                const fechaOriginal = new Date(); // Obtiene la fecha actual
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
@@ -152,13 +151,12 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                // Obtiene el ID del usuario y deviceID
-                const userId = localStorage.getItem('userId'); // Asegúrate de haberlo guardado al iniciar sesión
-                const deviceID = localStorage.getItem('deviceID'); // Asegúrate de haberlo guardado al iniciar sesión
+                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
+                const deviceID = localStorage.getItem('deviceID');
 
-                // Genera la fecha y hora actual y suma un día y 12 horas
-                const fechaActual = new Date();
-                const fechaAjustada = sumarTiempo(fechaActual);
+                // Generar y ajustar fecha y hora
+                const fechaOriginal = new Date(); // Obtiene la fecha actual
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
@@ -175,12 +173,18 @@
             }
         });
 
-        // Manejador de evento para cerrar sesión
+        // Manejador para cerrar sesión
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('userId'); // Elimina el ID del usuario
-            localStorage.removeItem('deviceID'); // Elimina el Device ID
-            window.location.href = '/login.html'; // Redirige al login
+            const messageElement = document.getElementById('message');
+            messageElement.innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            
+            setTimeout(() => {
+                window.location.href = '/login.html';
+            }, 1000);
         });
+
+        // Llamar a la función para obtener la ubicación al cargar la página
+        getLocation().then(showPosition).catch(showError);
     </script>
 </body>
 </html>
