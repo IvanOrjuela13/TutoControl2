@@ -8,20 +8,14 @@ router.post('/entrada', async (req, res) => {
     const { userId, deviceID, ubicacion } = req.body;
 
     try {
-        // Establece la fecha y hora a 26 de octubre de 2024, 2:43 PM en Bogotá
-        let fechaLocal = moment.tz("2024-10-26 14:43", "America/Bogota");
-
-        // Resta 5 horas para ajustar la hora al formato UTC
-        fechaLocal.subtract(5, 'hours');
-
-        // Suma 6 minutos
-        fechaLocal.add(6, 'minutes');
+        // Establece la fecha y hora actual en la zona horaria de Bogotá
+        let fechaLocal = moment.tz("America/Bogota");
 
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
             ubicacion,
-            fecha: fechaLocal.toDate(), // Usa la fecha local ajustada
+            fecha: fechaLocal.toDate(), // Usa la fecha actual en Bogotá
             tipo: 'entrada'
         });
         await nuevoRegistro.save();
@@ -37,20 +31,14 @@ router.post('/salida', async (req, res) => {
     const { userId, deviceID, ubicacion } = req.body;
 
     try {
-        // Establece la fecha y hora a 26 de octubre de 2024, 2:43 PM en Bogotá
-        let fechaLocal = moment.tz("2024-10-26 14:43", "America/Bogota");
-
-        // Resta 5 horas para ajustar la hora al formato UTC
-        fechaLocal.subtract(5, 'hours');
-
-        // Suma 6 minutos
-        fechaLocal.add(6, 'minutes');
+        // Establece la fecha y hora actual en la zona horaria de Bogotá
+        let fechaLocal = moment.tz("America/Bogota");
 
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
             ubicacion,
-            fecha: fechaLocal.toDate(), // Usa la fecha local ajustada
+            fecha: fechaLocal.toDate(), // Usa la fecha actual en Bogotá
             tipo: 'salida'
         });
         await nuevoRegistro.save();
