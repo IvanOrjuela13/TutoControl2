@@ -81,11 +81,9 @@
         }
 
         // Función para ajustar la fecha y hora
-        function ajustarFechaYHora(fechaOriginal) {
-            let fechaAjustada = new Date(fechaOriginal);
-            fechaAjustada.setDate(fechaAjustada.getDate() + 1); // Sumar un día
-            fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Sumar 12 horas
-            return fechaAjustada.toISOString(); // Convertir a formato ISO 8601
+        function ajustarFechaYHora() {
+            const fechaActual = new Date(); // Obtiene la fecha actual
+            return fechaActual.toISOString(); // Convierte a formato ISO 8601
         }
 
         function showPosition(position) {
@@ -127,8 +125,7 @@
                 const deviceID = localStorage.getItem('deviceID');
 
                 // Generar y ajustar fecha y hora
-                const fechaOriginal = new Date(); // Obtiene la fecha actual
-                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
+                const fechaAjustada = ajustarFechaYHora(); // Obtiene la fecha actual sin ajustes
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
@@ -155,8 +152,7 @@
                 const deviceID = localStorage.getItem('deviceID');
 
                 // Generar y ajustar fecha y hora
-                const fechaOriginal = new Date(); // Obtiene la fecha actual
-                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
+                const fechaAjustada = ajustarFechaYHora(); // Obtiene la fecha actual sin ajustes
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
