@@ -14,6 +14,9 @@ router.post('/entrada', async (req, res) => {
         // Resta 5 horas para ajustar la hora al formato UTC
         fechaLocal.subtract(5, 'hours');
 
+        // Suma 6 minutos
+        fechaLocal.add(6, 'minutes');
+
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
@@ -39,6 +42,9 @@ router.post('/salida', async (req, res) => {
 
         // Resta 5 horas para ajustar la hora al formato UTC
         fechaLocal.subtract(5, 'hours');
+
+        // Suma 6 minutos
+        fechaLocal.add(6, 'minutes');
 
         const nuevoRegistro = new Registro({
             userId,
