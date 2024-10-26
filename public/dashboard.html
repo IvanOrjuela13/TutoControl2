@@ -80,10 +80,12 @@
             });
         }
 
-        // Función para ajustar la fecha y hora
-        function ajustarFechaYHora() {
-            const fechaActual = new Date(); // Obtiene la fecha actual
-            return fechaActual.toISOString(); // Convierte a formato ISO 8601
+        // Función para sumar tiempo a la fecha
+        function sumarTiempo(fecha, horas = 0, minutos = 0) {
+            const nuevaFecha = new Date(fecha);
+            nuevaFecha.setHours(nuevaFecha.getHours() + horas);
+            nuevaFecha.setMinutes(nuevaFecha.getMinutes() + minutos);
+            return nuevaFecha.toISOString(); // Devuelve en formato ISO 8601
         }
 
         function showPosition(position) {
@@ -93,8 +95,8 @@
             };
 
             document.getElementById('location').innerHTML = `Latitud: ${locationData.lat}, Longitud: ${locationData.lng}`;
-            document.getElementById('timestamp').innerHTML = `Fecha y Hora: ${new Date().toLocaleString()}`;
-
+            const fechaActual = new Date();
+            document.getElementById('timestamp').innerHTML = `Fecha y Hora: ${fechaActual.toLocaleString()}`;
             return locationData;
         }
 
@@ -121,11 +123,12 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
+                const userId = localStorage.getItem('userId'); // Obtén el ID del usuario del localStorage
                 const deviceID = localStorage.getItem('deviceID');
 
-                // Generar y ajustar fecha y hora
-                const fechaAjustada = ajustarFechaYHora(); // Obtiene la fecha actual sin ajustes
+                // Generar fecha y hora actual
+                const fechaActual = new Date();
+                const fechaAjustada = sumarTiempo(fechaActual, 0, 0); // Sumar 0 horas y 0 minutos (puedes ajustar esto)
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
@@ -148,11 +151,12 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
+                const userId = localStorage.getItem('userId'); // Obtén el ID del usuario del localStorage
                 const deviceID = localStorage.getItem('deviceID');
 
-                // Generar y ajustar fecha y hora
-                const fechaAjustada = ajustarFechaYHora(); // Obtiene la fecha actual sin ajustes
+                // Generar fecha y hora actual
+                const fechaActual = new Date();
+                const fechaAjustada = sumarTiempo(fechaActual, 0, 0); // Sumar 0 horas y 0 minutos (puedes ajustar esto)
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
