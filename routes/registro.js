@@ -8,22 +8,19 @@ router.post('/entrada', async (req, res) => {
     const { userId, deviceID, ubicacion } = req.body;
 
     try {
-        // Obtén la fecha y hora con la zona horaria correcta
+        // Obtén la fecha y hora con la zona horaria de Bogotá
         let fechaLocal = moment().tz("America/Bogota");
 
-        // Resta un día, suma 5 horas, añade 2 horas y 1 minuto para ajustar correctamente
+        // Sumar un día y ajustar la hora a las 22:00
         fechaLocal = fechaLocal
-            .subtract(1, 'days')
-            .add(5, 'hours')
-            .add(2, 'hours')
-            .add(1, 'minute') // Ajuste para corregir los 32 minutos extra
-            .toDate();
+            .add(1, 'days') // Sumar un día
+            .set({ hour: 22, minute: 0, second: 0, millisecond: 0 }); // Ajustar a las 22:00
 
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
             ubicacion,
-            fecha: fechaLocal, // Usa la fecha local ajustada
+            fecha: fechaLocal.toDate(), // Usa la fecha local ajustada
             tipo: 'entrada'
         });
         await nuevoRegistro.save();
@@ -39,22 +36,19 @@ router.post('/salida', async (req, res) => {
     const { userId, deviceID, ubicacion } = req.body;
 
     try {
-        // Obtén la fecha y hora con la zona horaria correcta
+        // Obtén la fecha y hora con la zona horaria de Bogotá
         let fechaLocal = moment().tz("America/Bogota");
 
-        // Resta un día, suma 5 horas, añade 2 horas y 1 minuto para ajustar correctamente
+        // Sumar un día y ajustar la hora a las 22:00
         fechaLocal = fechaLocal
-            .subtract(1, 'days')
-            .add(5, 'hours')
-            .add(2, 'hours')
-            .add(1, 'minute') // Ajuste para corregir los 32 minutos extra
-            .toDate();
+            .add(1, 'days') // Sumar un día
+            .set({ hour: 22, minute: 0, second: 0, millisecond: 0 }); // Ajustar a las 22:00
 
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
             ubicacion,
-            fecha: fechaLocal, // Usa la fecha local ajustada
+            fecha: fechaLocal.toDate(), // Usa la fecha local ajustada
             tipo: 'salida'
         });
         await nuevoRegistro.save();
