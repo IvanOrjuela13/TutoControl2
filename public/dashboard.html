@@ -85,7 +85,7 @@
             let fechaAjustada = new Date(fechaOriginal);
             fechaAjustada.setDate(fechaAjustada.getDate() + 1); // Sumar un día
             fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Sumar 12 horas
-            return fechaAjustada;
+            return fechaAjustada.toISOString(); // Convertir a formato ISO 8601
         }
 
         function showPosition(position) {
@@ -123,12 +123,12 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                const userId = 'ID_DEL_USUARIO';
+                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
                 const deviceID = localStorage.getItem('deviceID');
-                
+
                 // Generar y ajustar fecha y hora
-                const fechaOriginal = new Date();
-                const fechaAjustada = ajustarFechaYHora(fechaOriginal);
+                const fechaOriginal = new Date(); // Obtiene la fecha actual
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
@@ -151,12 +151,12 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                const userId = 'ID_DEL_USUARIO';
+                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
                 const deviceID = localStorage.getItem('deviceID');
 
                 // Generar y ajustar fecha y hora
-                const fechaOriginal = new Date();
-                const fechaAjustada = ajustarFechaYHora(fechaOriginal);
+                const fechaOriginal = new Date(); // Obtiene la fecha actual
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
