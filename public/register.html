@@ -7,31 +7,39 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background: linear-gradient(to right, #6a11cb, #2575fc);
-            color: #fff;
+            background-color: #f7f9fc; /* Color de fondo más suave */
+            color: #333;
         }
         .container {
-            background: rgba(0, 0, 0, 0.7);
+            background: white; /* Fondo blanco para el contenedor */
             border-radius: 10px;
             padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Sombra sutil */
             margin-top: 100px;
         }
         h2 {
             font-family: 'Arial', sans-serif;
             margin-bottom: 20px;
+            color: #4a4a4a; /* Color del título más suave */
         }
         .btn-primary {
-            background-color: #ff4757;
+            background-color: #007bff; /* Color del botón */
             border: none;
         }
         .btn-primary:hover {
-            background-color: #e84118;
+            background-color: #0056b3; /* Color al pasar el mouse */
         }
         small {
-            color: #f7f7f7;
+            color: #666; /* Color del texto pequeño */
         }
         .alert {
             opacity: 0.9;
+        }
+        a {
+            color: #007bff; /* Color del enlace */
+        }
+        a:hover {
+            color: #0056b3; /* Color del enlace al pasar el mouse */
         }
     </style>
 </head>
@@ -52,7 +60,7 @@
         </form>
 
         <div id="message" class="mt-3"></div>
-        <p class="mt-3 text-center">¿Ya tienes una cuenta? <a href="login.html" class="text-light">Iniciar sesión</a></p>
+        <p class="mt-3 text-center">¿Ya tienes una cuenta? <a href="login.html">Iniciar sesión</a></p>
     </div>
 
     <script>
