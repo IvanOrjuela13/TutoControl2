@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+public/dashboard.html <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -80,10 +80,11 @@
             });
         }
 
-        // Función para ajustar la fecha sumando un día
-        function ajustarFecha(fechaOriginal) {
-            const fechaAjustada = new Date(fechaOriginal);
+        // Función para ajustar la fecha y hora
+        function ajustarFechaYHora(fechaOriginal) {
+            let fechaAjustada = new Date(fechaOriginal);
             fechaAjustada.setDate(fechaAjustada.getDate() + 1); // Sumar un día
+            fechaAjustada.setHours(fechaAjustada.getHours() + 12); // Sumar 12 horas
             return fechaAjustada.toISOString(); // Convertir a formato ISO 8601
         }
 
@@ -125,9 +126,9 @@
                 const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
                 const deviceID = localStorage.getItem('deviceID');
 
-                // Ajuste de la fecha sumándole un día
-                const fechaOriginal = new Date();
-                const fechaAjustada = ajustarFecha(fechaOriginal);
+                // Generar y ajustar fecha y hora
+                const fechaOriginal = new Date(); // Obtiene la fecha actual
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
@@ -153,9 +154,9 @@
                 const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario correspondiente
                 const deviceID = localStorage.getItem('deviceID');
 
-                // Ajuste de la fecha sumándole un día
-                const fechaOriginal = new Date();
-                const fechaAjustada = ajustarFecha(fechaOriginal);
+                // Generar y ajustar fecha y hora
+                const fechaOriginal = new Date(); // Obtiene la fecha actual
+                const fechaAjustada = ajustarFechaYHora(fechaOriginal); // Ajusta la fecha
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
@@ -174,7 +175,8 @@
 
         // Manejador para cerrar sesión
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            const messageElement = document.getElementById('message');
+            messageElement.innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
             
             setTimeout(() => {
                 window.location.href = '/login.html';
