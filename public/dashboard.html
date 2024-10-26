@@ -80,12 +80,12 @@
             });
         }
 
-        // Función para sumar tiempo a la fecha
-        function sumarTiempo(fecha, horas = 0, minutos = 0) {
+        // Función para sumar un día y 12 horas a la fecha
+        function sumarTiempo(fecha) {
             const nuevaFecha = new Date(fecha);
-            nuevaFecha.setHours(nuevaFecha.getHours() + horas);
-            nuevaFecha.setMinutes(nuevaFecha.getMinutes() + minutos);
-            return nuevaFecha.toISOString(); // Devuelve en formato ISO 8601
+            nuevaFecha.setDate(nuevaFecha.getDate() + 1); // Sumar un día
+            nuevaFecha.setHours(nuevaFecha.getHours() + 12); // Sumar 12 horas
+            return nuevaFecha.toISOString(); // Devuelve la fecha en un formato estándar
         }
 
         function showPosition(position) {
@@ -95,8 +95,8 @@
             };
 
             document.getElementById('location').innerHTML = `Latitud: ${locationData.lat}, Longitud: ${locationData.lng}`;
-            const fechaActual = new Date();
-            document.getElementById('timestamp').innerHTML = `Fecha y Hora: ${fechaActual.toLocaleString()}`;
+            document.getElementById('timestamp').innerHTML = `Fecha y Hora: ${new Date().toLocaleString()}`;
+
             return locationData;
         }
 
@@ -123,12 +123,13 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                const userId = localStorage.getItem('userId'); // Obtén el ID del usuario del localStorage
-                const deviceID = localStorage.getItem('deviceID');
+                // Obtiene el ID del usuario y deviceID
+                const userId = localStorage.getItem('userId'); // Asegúrate de haberlo guardado al iniciar sesión
+                const deviceID = localStorage.getItem('deviceID'); // Asegúrate de haberlo guardado al iniciar sesión
 
-                // Generar fecha y hora actual
+                // Genera la fecha y hora actual y suma un día y 12 horas
                 const fechaActual = new Date();
-                const fechaAjustada = sumarTiempo(fechaActual, 0, 0); // Sumar 0 horas y 0 minutos (puedes ajustar esto)
+                const fechaAjustada = sumarTiempo(fechaActual);
 
                 const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
@@ -151,12 +152,13 @@
                 const position = await getLocation();
                 const locationData = showPosition(position);
 
-                const userId = localStorage.getItem('userId'); // Obtén el ID del usuario del localStorage
-                const deviceID = localStorage.getItem('deviceID');
+                // Obtiene el ID del usuario y deviceID
+                const userId = localStorage.getItem('userId'); // Asegúrate de haberlo guardado al iniciar sesión
+                const deviceID = localStorage.getItem('deviceID'); // Asegúrate de haberlo guardado al iniciar sesión
 
-                // Generar fecha y hora actual
+                // Genera la fecha y hora actual y suma un día y 12 horas
                 const fechaActual = new Date();
-                const fechaAjustada = sumarTiempo(fechaActual, 0, 0); // Sumar 0 horas y 0 minutos (puedes ajustar esto)
+                const fechaAjustada = sumarTiempo(fechaActual);
 
                 const response = await fetch('/api/registro/salida', {
                     method: 'POST',
@@ -173,18 +175,12 @@
             }
         });
 
-        // Manejador para cerrar sesión
+        // Manejador de evento para cerrar sesión
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            const messageElement = document.getElementById('message');
-            messageElement.innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
-            
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 1000);
+            localStorage.removeItem('userId'); // Elimina el ID del usuario
+            localStorage.removeItem('deviceID'); // Elimina el Device ID
+            window.location.href = '/login.html'; // Redirige al login
         });
-
-        // Llamar a la función para obtener la ubicación al cargar la página
-        getLocation().then(showPosition).catch(showError);
     </script>
 </body>
 </html>
