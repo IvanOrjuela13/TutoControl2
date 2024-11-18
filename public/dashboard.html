@@ -105,13 +105,27 @@
 
     // Captura la foto y la muestra más pequeña
     function capturePhoto() {
+        // Establecemos las dimensiones correctas para el canvas
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        
+        // Dibujamos el contenido del video en el canvas
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+        // Convertimos el contenido del canvas a una imagen
         const dataUrl = canvas.toDataURL('image/png');
+
+        // Creamos un nuevo elemento de imagen
         const capturedImage = document.createElement('img');
         capturedImage.src = dataUrl;
-        capturedImage.style.maxWidth = '300px'; // Aseguramos que la imagen sea más pequeña
+        capturedImage.style.maxWidth = '300px'; // Hacemos que la imagen sea más pequeña
         capturedImage.style.marginTop = '20px';
-        capturedImageContainer.innerHTML = ''; // Limpiar cualquier imagen anterior
+
+        // Limpiamos cualquier imagen anterior y agregamos la nueva
+        capturedImageContainer.innerHTML = ''; 
         capturedImageContainer.appendChild(capturedImage);
+
+        // Actualizamos el mensaje
         message.textContent = '¡Foto tomada!'; // Mensaje de confirmación
     }
 
