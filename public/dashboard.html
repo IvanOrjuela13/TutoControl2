@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detección de Cara y Parpadeo</title>
+    <title>Detección de Cara y Voz</title>
     <style>
         body {
             display: flex;
@@ -36,27 +36,36 @@
             font-size: 20px;
             color: green;
         }
+        img {
+            max-width: 300px; /* Hacemos que la imagen capturada sea más pequeña */
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-<h1>Detección de Cara y Parpadeo</h1>
+<h1>Detección de Cara y Reconocimiento de Voz</h1>
 <video id="videoElement" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 <button id="captureButton">Capturar Foto</button>
 <p id="message"></p>
+
+<!-- Contenedor para la imagen capturada -->
+<div id="capturedImageContainer"></div>
 
 <script>
     const videoElement = document.getElementById('videoElement');
     const canvas = document.getElementById('canvas');
     const captureButton = document.getElementById('captureButton');
     const message = document.getElementById('message');
+    const capturedImageContainer = document.getElementById('capturedImageContainer');
     const ctx = canvas.getContext('2d');
     let displaySize;
 
-    // Configurar y cargar los modelos de face-api.js
+    // Configurar y cargar la cámara
     async function setup() {
         await startCamera();
+        setupVoiceRecognition(); // Inicializamos el reconocimiento de voz
     }
 
     // Activar la cámara
@@ -79,7 +88,7 @@
         }
     }
 
-    // Función para detectar la cara
+    // Función para detectar la cara (simulada)
     async function detectFace() {
         const faceDetected = detectFaceInCanvas();
         
@@ -92,7 +101,7 @@
             ctx.stroke();
             ctx.closePath();
 
-            message.textContent = '¡Cara detectada! Parpadea varias veces.';
+            message.textContent = '¡Cara detectada! Dile "foto" para capturar.';
         } else {
             message.textContent = 'Esperando cara...';
         }
@@ -113,13 +122,39 @@
         return simulatedFace;
     }
 
-    // Configuración para capturar una foto
+    // Captura la foto y la muestra más pequeña
     captureButton.addEventListener('click', () => {
         const dataUrl = canvas.toDataURL('image/png');
         const capturedImage = document.createElement('img');
         capturedImage.src = dataUrl;
-        document.body.appendChild(capturedImage);
+        capturedImage.style.maxWidth = '300px'; // Aseguramos que la imagen sea más pequeña
+        capturedImage.style.marginTop = '20px';
+        capturedImageContainer.innerHTML = ''; // Limpiar cualquier imagen anterior
+        capturedImageContainer.appendChild(capturedImage);
     });
+
+    // Inicializar el reconocimiento de voz
+    function setupVoiceRecognition() {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'es-ES'; // Configuramos el idioma a español
+        recognition.continuous = false; // No escuchamos de forma continua
+        recognition.interimResults = false; // No queremos resultados intermedios
+
+        // Cuando se detecta un comando de voz
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase();
+            console.log('Reconocido:', transcript);
+
+            if (transcript.includes('foto')) {
+                // Si se dice "foto", capturamos la imagen
+                captureButton.click(); 
+                message.textContent = '¡Foto tomada! Reconocida con la voz.';
+            }
+        };
+
+        // Iniciar la escucha
+        recognition.start();
+    }
 
     // Iniciar el proceso
     setup();
