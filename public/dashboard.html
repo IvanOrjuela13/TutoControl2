@@ -211,14 +211,12 @@
         // Configurar el flujo de video
         async function startVideo() {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: true
+                video: { width: 640, height: 480 }
             });
             videoElement.srcObject = stream;
-            await new Promise((resolve) => {
-                videoElement.onloadedmetadata = () => {
-                    resolve();
-                };
-            });
+            videoElement.onloadedmetadata = () => {
+                videoElement.play();
+            };
             faceMesh.initialize();
             requestAnimationFrame(onFrame);
         }
