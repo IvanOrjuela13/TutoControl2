@@ -44,62 +44,85 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script>
-  let videoElement = document.getElementById('videoElement');
-  let canvas = document.getElementById('canvas');
-  let ctx = canvas.getContext('2d');
-  let message = document.getElementById('message');
+    let videoElement = document.getElementById('videoElement');
+    let canvas = document.getElementById('canvas');
+    let ctx = canvas.getContext('2d');
+    let message = document.getElementById('message');
   
-  // Configuración de la cámara
-  const video = document.createElement('video');
-  const camera = new Camera(video, {
-    onFrame: async () => {
-      await detectFace(video);
-    },
-    width: 640,
-    height: 480
-  });
-  camera.start();
-
-  // Cargar el modelo de detección de rostros de MediaPipe
-  const faceDetection = new FaceDetection.FaceDetection({
-    locateFile: (file) => {
-      return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
+    // Configuración de la cámara
+    async function setupCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'user', // Usamos la cámara frontal
+                    width: { ideal: 640 }, // Ancho ideal de video
+                    height: { ideal: 480 } // Alto ideal de video
+                }
+            });
+            videoElement.srcObject = stream;
+            videoElement.onloadedmetadata = () => {
+                videoElement.play();
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+            };
+        } catch (err) {
+            console.error('Error al acceder a la cámara: ', err);
+            alert('No se pudo acceder a la cámara');
+        }
     }
-  });
-  faceDetection.setOptions({
-    modelSelection: 1, // Usa el modelo más preciso
-    minDetectionConfidence: 0.5
-  });
 
-  // Función para detectar rostros
-  async function detectFace(video) {
-    const predictions = await faceDetection.send({image: video});
-    
-    // Limpiar el canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Dibujar un círculo si hay una cara detectada
-    if (predictions.length > 0) {
-      const face = predictions[0].boundingBox;
-      const x = face.topLeft[0];
-      const y = face.topLeft[1];
-      const width = face.bottomRight[0] - face.topLeft[0];
-      const height = face.bottomRight[1] - face.topLeft[1];
+    // Cargar el modelo de detección de rostros de MediaPipe
+    const faceDetection = new FaceDetection.FaceDetection({
+        locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
+        }
+    });
+    faceDetection.setOptions({
+        modelSelection: 1, // Usa el modelo más preciso
+        minDetectionConfidence: 0.5
+    });
 
-      // Dibujar un círculo alrededor de la cara
-      ctx.beginPath();
-      ctx.arc(x + width / 2, y + height / 2, Math.min(width, height) / 2, 0, 2 * Math.PI);
-      ctx.strokeStyle = 'green';
-      ctx.lineWidth = 5;
-      ctx.stroke();
+    // Función para detectar rostros
+    async function detectFace(video) {
+        const predictions = await faceDetection.send({ image: video });
+        
+        // Limpiar el canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dibujar un círculo si hay una cara detectada
+        if (predictions.length > 0) {
+            const face = predictions[0].boundingBox;
+            const x = face.topLeft[0];
+            const y = face.topLeft[1];
+            const width = face.bottomRight[0] - face.topLeft[0];
+            const height = face.bottomRight[1] - face.topLeft[1];
 
-      // Mostrar el mensaje de éxito
-      message.textContent = '¡Rostro Detectado!';
-    } else {
-      // Limpiar el mensaje si no se detecta rostro
-      message.textContent = '';
+            // Dibujar un círculo alrededor de la cara
+            ctx.beginPath();
+            ctx.arc(x + width / 2, y + height / 2, Math.min(width, height) / 2, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'green';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+
+            // Mostrar el mensaje de éxito
+            message.textContent = '¡Rostro Detectado!';
+        } else {
+            // Limpiar el mensaje si no se detecta rostro
+            message.textContent = '';
+        }
     }
-  }
+
+    // Configurar la cámara y comenzar la detección
+    setupCamera().then(() => {
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await detectFace(videoElement);
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+    });
 </script>
 
 </body>
