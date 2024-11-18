@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Reconocimiento Facial con MediaPipe</title>
     <style>
         body {
             background-color: #f0f2f5;
@@ -23,8 +23,11 @@
 <body>
     <video id="videoElement" autoplay playsinline></video>
 
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.3.1622/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.1.0/dist/tf-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.1.0/dist/tf-converter.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.1.0/dist/tf-backend-webgl.min.js"></script>
     <script>
-        // Inicia el flujo de video de la cámara
         async function startVideo() {
             try {
                 const videoElement = document.getElementById('videoElement');
@@ -33,12 +36,57 @@
                 });
 
                 videoElement.srcObject = stream;
+
+                // Cargar y configurar MediaPipe FaceMesh
+                const faceMesh = new FaceMesh.FaceMesh({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.3.1622/${file}`,
+                });
+
+                faceMesh.setOptions({
+                    maxNumFaces: 1,  // Número máximo de caras a detectar
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                // Llamar al modelo para hacer predicciones
+                faceMesh.onResults(onFaceMeshResults);
+
+                // Procesar el video cuando esté listo
+                function onFaceMeshResults(results) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = results.image.width;
+                    canvas.height = results.image.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(results.image, 0, 0);
+
+                    // Dibujar los puntos de la cara (Mesh)
+                    if (results.multiFaceLandmarks) {
+                        for (const landmarks of results.multiFaceLandmarks) {
+                            ctx.fillStyle = 'red';
+                            for (let i = 0; i < landmarks.length; i++) {
+                                const x = landmarks[i].x * canvas.width;
+                                const y = landmarks[i].y * canvas.height;
+                                ctx.beginPath();
+                                ctx.arc(x, y, 1, 0, 2 * Math.PI);
+                                ctx.fill();
+                            }
+                        }
+                    }
+                    document.body.appendChild(canvas); // Esto es solo para ver los puntos de la cara
+                }
+
+                // Enviar el video al modelo de MediaPipe
+                function sendToFaceMesh() {
+                    faceMesh.send({ image: videoElement });
+                    requestAnimationFrame(sendToFaceMesh); // Continuar enviando el video a MediaPipe
+                }
+
+                sendToFaceMesh(); // Iniciar el flujo de reconocimiento facial
             } catch (error) {
                 console.error("No se pudo acceder a la cámara:", error);
             }
         }
 
-        // Llamamos a la función para iniciar el video
         startVideo();
     </script>
 </body>
