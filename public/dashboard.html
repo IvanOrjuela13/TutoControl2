@@ -60,6 +60,7 @@
 
         let referenceImage = null;
         let currentImage = null;
+        let photoCaptured = false; // Flag para asegurarnos de que se captura la primera foto
 
         // Acceder a la cámara
         navigator.mediaDevices.getUserMedia({ video: true })
@@ -86,10 +87,14 @@
             const command = event.results[0][0].transcript.toLowerCase();
             console.log("Comando recibido: ", command);
 
-            // Si el comando es "foto", toma la foto
+            // Si el comando es "foto"
             if (command.includes("foto")) {
-                if (!referenceImage) {
+                if (!photoCaptured) {
                     capturePhoto(); // Tomar la primera foto (como referencia)
+                    recognition.stop(); // Detener reconocimiento para esperar el siguiente comando
+                    setTimeout(() => {
+                        startListening(); // Reiniciar el reconocimiento de voz para esperar la segunda foto
+                    }, 1000);
                 } else {
                     capturePhoto(); // Tomar la segunda foto
                     setTimeout(comparePhotos, 1000); // Comparar después de un segundo
@@ -114,8 +119,9 @@
             takenPhoto.style.display = "block";
 
             // Si es la primera foto, la guardamos como referencia
-            if (!referenceImage) {
+            if (!photoCaptured) {
                 referenceImage = imgData;
+                photoCaptured = true; // Marcar que ya se ha tomado la primera foto
                 alert("Foto tomada como referencia. ¡Ahora di 'foto' de nuevo para verificar!");
             } else {
                 currentImage = imgData;
