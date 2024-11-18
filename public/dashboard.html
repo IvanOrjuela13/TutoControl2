@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconocimiento Facial con MediaPipe</title>
+    <title>Detector de Movimiento</title>
     <style>
         body {
-            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-color: #f0f2f5;
             margin: 0;
         }
         #videoElement {
@@ -18,23 +18,12 @@
             height: 480px;
             background-color: black;
         }
-        #outputCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none; /* Evitar que el canvas interfiera con el video */
-        }
     </style>
 </head>
 <body>
     <video id="videoElement" autoplay playsinline></video>
-    <canvas id="outputCanvas"></canvas>
-
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.3.1622/face_mesh.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.1.0/dist/tf-core.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.1.0/dist/tf-converter.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@3.1.0/dist/tf-backend-webgl.min.js"></script>
     <script>
+        // Obtener la cámara y configurar el video
         async function startVideo() {
             try {
                 const videoElement = document.getElementById('videoElement');
@@ -44,56 +33,57 @@
 
                 videoElement.srcObject = stream;
 
-                // Crear el canvas para dibujar sobre el video
-                const canvas = document.getElementById('outputCanvas');
+                // Crear el canvas para la captura de imágenes
+                const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                canvas.width = videoElement.width;
-                canvas.height = videoElement.height;
+                canvas.width = 640;
+                canvas.height = 480;
 
-                // Cargar y configurar MediaPipe FaceMesh
-                const faceMesh = new FaceMesh.FaceMesh({
-                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.3.1622/${file}`,
-                });
+                let lastImageData = null;
 
-                faceMesh.setOptions({
-                    maxNumFaces: 1,  // Número máximo de caras a detectar
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5
-                });
+                // Función que compara las imágenes
+                function detectMotion() {
+                    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                    const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const currentPixels = currentImageData.data;
 
-                // Llamar al modelo para hacer predicciones
-                faceMesh.onResults(onFaceMeshResults);
+                    // Si es la primera imagen, no hacer comparación
+                    if (!lastImageData) {
+                        lastImageData = currentImageData;
+                        return;
+                    }
 
-                // Procesar el video cuando esté listo
-                function onFaceMeshResults(results) {
-                    // Limpiar el canvas
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Dibujar la imagen de video en el canvas
-                    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+                    let movementDetected = false;
+                    let diffThreshold = 10000;  // Valor umbral para detectar movimiento
 
-                    // Dibujar los puntos de la cara (Mesh)
-                    if (results.multiFaceLandmarks) {
-                        for (const landmarks of results.multiFaceLandmarks) {
-                            ctx.fillStyle = 'red';
-                            for (let i = 0; i < landmarks.length; i++) {
-                                const x = landmarks[i].x * canvas.width;
-                                const y = landmarks[i].y * canvas.height;
-                                ctx.beginPath();
-                                ctx.arc(x, y, 1, 0, 2 * Math.PI);
-                                ctx.fill();
-                            }
+                    // Comparar píxeles actuales con los anteriores
+                    for (let i = 0; i < currentPixels.length; i += 4) {
+                        const r1 = lastImageData.data[i];
+                        const g1 = lastImageData.data[i + 1];
+                        const b1 = lastImageData.data[i + 2];
+                        const r2 = currentPixels[i];
+                        const g2 = currentPixels[i + 1];
+                        const b2 = currentPixels[i + 2];
+
+                        const diff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+                        if (diff > diffThreshold) {
+                            movementDetected = true;
+                            break;
                         }
                     }
+
+                    // Si se detecta movimiento, mostrar un mensaje
+                    if (movementDetected) {
+                        console.log('¡Movimiento detectado!');
+                    }
+
+                    // Actualizar la imagen anterior
+                    lastImageData = currentImageData;
+
+                    requestAnimationFrame(detectMotion);
                 }
 
-                // Enviar el video al modelo de MediaPipe
-                function sendToFaceMesh() {
-                    faceMesh.send({ image: videoElement });
-                    requestAnimationFrame(sendToFaceMesh); // Continuar enviando el video a MediaPipe
-                }
-
-                sendToFaceMesh(); // Iniciar el flujo de reconocimiento facial
+                detectMotion();
             } catch (error) {
                 console.error("No se pudo acceder a la cámara:", error);
             }
