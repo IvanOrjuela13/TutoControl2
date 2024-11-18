@@ -18,10 +18,17 @@
             height: 480px;
             background-color: black;
         }
+        #outputCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Evitar que el canvas interfiera con el video */
+        }
     </style>
 </head>
 <body>
     <video id="videoElement" autoplay playsinline></video>
+    <canvas id="outputCanvas"></canvas>
 
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.3.1622/face_mesh.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@3.1.0/dist/tf-core.min.js"></script>
@@ -36,6 +43,12 @@
                 });
 
                 videoElement.srcObject = stream;
+
+                // Crear el canvas para dibujar sobre el video
+                const canvas = document.getElementById('outputCanvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = videoElement.width;
+                canvas.height = videoElement.height;
 
                 // Cargar y configurar MediaPipe FaceMesh
                 const faceMesh = new FaceMesh.FaceMesh({
@@ -53,11 +66,11 @@
 
                 // Procesar el video cuando esté listo
                 function onFaceMeshResults(results) {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = results.image.width;
-                    canvas.height = results.image.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(results.image, 0, 0);
+                    // Limpiar el canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Dibujar la imagen de video en el canvas
+                    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
                     // Dibujar los puntos de la cara (Mesh)
                     if (results.multiFaceLandmarks) {
@@ -72,7 +85,6 @@
                             }
                         }
                     }
-                    document.body.appendChild(canvas); // Esto es solo para ver los puntos de la cara
                 }
 
                 // Enviar el video al modelo de MediaPipe
