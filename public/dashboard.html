@@ -8,29 +8,34 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
         }
         #video {
             width: 100%;
-            max-width: 400px;
+            max-width: 300px;
             border: 2px solid black;
         }
         #canvas, #photo {
             display: none;
         }
-        #takenPhoto {
+        #takenPhoto, #photoValidation {
             width: 100%;
-            max-width: 400px;
+            max-width: 300px;
             border: 2px solid green;
             margin-top: 10px;
         }
         .btn {
-            padding: 10px;
+            padding: 8px 16px;
             background-color: #28a745;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             border: none;
             cursor: pointer;
             margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -41,14 +46,18 @@
     <img id="takenPhoto" src="" alt="Foto tomada" />
     <br />
     <button class="btn" id="checkButton" style="display:none;">Verificar Foto</button>
-
+    <br />
+    <img id="photoValidation" src="" alt="Foto para verificación" />
+    
     <script>
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
         const takenPhoto = document.getElementById("takenPhoto");
         const checkButton = document.getElementById("checkButton");
+        const photoValidation = document.getElementById("photoValidation");
 
         let referenceImage = null;
+        let currentImage = null;
 
         // Acceder a la cámara
         navigator.mediaDevices.getUserMedia({ video: true })
@@ -101,7 +110,11 @@
             if (!referenceImage) {
                 referenceImage = imgData;
                 checkButton.style.display = "block"; // Mostrar el botón de verificación
-                alert("Foto tomada como referencia. ¡Ahora puedes tomar una nueva foto para verificar!");
+                alert("Foto tomada como referencia. ¡Ahora toma una nueva foto para verificar!");
+            } else {
+                currentImage = imgData;
+                photoValidation.src = currentImage;
+                photoValidation.style.display = "block"; // Mostrar la foto de la nueva imagen
             }
         }
 
@@ -112,15 +125,12 @@
                 return;
             }
 
-            const context = canvas.getContext("2d");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            if (!currentImage) {
+                alert("No se ha tomado una foto para comparar.");
+                return;
+            }
 
-            const newPhotoData = canvas.toDataURL("image/png");
-
-            // Comparar las dos imágenes
-            if (compareImages(referenceImage, newPhotoData)) {
+            if (compareImages(referenceImage, currentImage)) {
                 alert("¡Es la misma persona!");
             } else {
                 alert("No es la misma persona.");
