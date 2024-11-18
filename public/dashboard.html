@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captura de Foto</title>
+    <title>Detección de Cara y Parpadeo</title>
     <style>
         body {
             display: flex;
@@ -27,66 +27,102 @@
             cursor: pointer;
         }
         canvas {
-            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
-        img {
-            margin-top: 10px;
-            max-width: 640px;
-            max-height: 480px;
+        #message {
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
         }
     </style>
 </head>
 <body>
 
-<h1>Captura de Foto en Tiempo Real</h1>
+<h1>Detección de Cara y Parpadeo</h1>
 <video id="videoElement" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
 <button id="captureButton">Capturar Foto</button>
-<img id="capturedImage" alt="Imagen Capturada" />
+<p id="message"></p>
 
 <script>
-    // Obtener elementos de la interfaz
     const videoElement = document.getElementById('videoElement');
     const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
     const captureButton = document.getElementById('captureButton');
-    const capturedImage = document.getElementById('capturedImage');
+    const message = document.getElementById('message');
+    const ctx = canvas.getContext('2d');
+    let displaySize;
+
+    // Configurar y cargar los modelos de face-api.js
+    async function setup() {
+        await startCamera();
+    }
 
     // Activar la cámara
     async function startCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user' } // Usar cámara frontal
+                video: { facingMode: 'user' }
             });
             videoElement.srcObject = stream;
+
+            videoElement.onloadeddata = () => {
+                displaySize = { width: videoElement.videoWidth, height: videoElement.videoHeight };
+                canvas.width = displaySize.width;
+                canvas.height = displaySize.height;
+                detectFace();
+            };
         } catch (err) {
             console.error('Error al acceder a la cámara: ', err);
             alert('No se pudo acceder a la cámara.');
         }
     }
 
-    // Función para capturar la imagen de la cámara
-    function capturePhoto() {
-        // Establecer el tamaño del canvas igual al del video
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-
-        // Dibujar la imagen del video en el canvas
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        // Convertir el contenido del canvas a una imagen
-        const imageUrl = canvas.toDataURL('image/png');
+    // Función para detectar la cara
+    async function detectFace() {
+        const faceDetected = detectFaceInCanvas();
         
-        // Mostrar la imagen en el elemento img
-        capturedImage.src = imageUrl;
-        capturedImage.style.display = 'block'; // Hacer visible la imagen
+        // Dibujar el círculo de la cara en el canvas
+        if (faceDetected) {
+            ctx.beginPath();
+            ctx.arc(faceDetected.x + faceDetected.width / 2, faceDetected.y + faceDetected.height / 2, Math.max(faceDetected.width, faceDetected.height) / 2, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'green'; // Color del círculo
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.closePath();
+
+            message.textContent = '¡Cara detectada! Parpadea varias veces.';
+        } else {
+            message.textContent = 'Esperando cara...';
+        }
+
+        // Llamar a la función de detección en cada ciclo de animación
+        setTimeout(detectFace, 100);
     }
 
-    // Configuración del botón de captura
-    captureButton.addEventListener('click', capturePhoto);
+    // Función rudimentaria para detectar la cara (simulada con un área cuadrada)
+    function detectFaceInCanvas() {
+        // Obtenemos los píxeles del video
+        const width = videoElement.videoWidth;
+        const height = videoElement.videoHeight;
 
-    // Iniciar la cámara al cargar la página
-    startCamera();
+        // Definimos un área aproximada para la cara (simulada)
+        const simulatedFace = { x: width / 4, y: height / 4, width: width / 2, height: height / 2 };
+
+        return simulatedFace;
+    }
+
+    // Configuración para capturar una foto
+    captureButton.addEventListener('click', () => {
+        const dataUrl = canvas.toDataURL('image/png');
+        const capturedImage = document.createElement('img');
+        capturedImage.src = dataUrl;
+        document.body.appendChild(capturedImage);
+    });
+
+    // Iniciar el proceso
+    setup();
 </script>
 
 </body>
