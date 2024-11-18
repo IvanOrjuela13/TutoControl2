@@ -3,93 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Movimiento</title>
+    <title>Detección de Rostros con MediaPipe</title>
     <style>
         body {
+            margin: 0;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             background-color: #f0f2f5;
-            margin: 0;
         }
-        #videoElement {
-            width: 640px;
-            height: 480px;
-            background-color: black;
+        video {
+            position: absolute;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            position: absolute;
+            z-index: 1;
+        }
+        #message {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            color: green;
+            z-index: 2;
         }
     </style>
 </head>
 <body>
-    <video id="videoElement" autoplay playsinline></video>
-    <script>
-        // Obtener la cámara y configurar el video
-        async function startVideo() {
-            try {
-                const videoElement = document.getElementById('videoElement');
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 }
-                });
 
-                videoElement.srcObject = stream;
+<video id="videoElement" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+<div id="message"></div>
 
-                // Crear el canvas para la captura de imágenes
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = 640;
-                canvas.height = 480;
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script>
+  let videoElement = document.getElementById('videoElement');
+  let canvas = document.getElementById('canvas');
+  let ctx = canvas.getContext('2d');
+  let message = document.getElementById('message');
+  
+  // Configuración de la cámara
+  const video = document.createElement('video');
+  const camera = new Camera(video, {
+    onFrame: async () => {
+      await detectFace(video);
+    },
+    width: 640,
+    height: 480
+  });
+  camera.start();
 
-                let lastImageData = null;
+  // Cargar el modelo de detección de rostros de MediaPipe
+  const faceDetection = new FaceDetection.FaceDetection({
+    locateFile: (file) => {
+      return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
+    }
+  });
+  faceDetection.setOptions({
+    modelSelection: 1, // Usa el modelo más preciso
+    minDetectionConfidence: 0.5
+  });
 
-                // Función que compara las imágenes
-                function detectMotion() {
-                    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                    const currentImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const currentPixels = currentImageData.data;
+  // Función para detectar rostros
+  async function detectFace(video) {
+    const predictions = await faceDetection.send({image: video});
+    
+    // Limpiar el canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Dibujar un círculo si hay una cara detectada
+    if (predictions.length > 0) {
+      const face = predictions[0].boundingBox;
+      const x = face.topLeft[0];
+      const y = face.topLeft[1];
+      const width = face.bottomRight[0] - face.topLeft[0];
+      const height = face.bottomRight[1] - face.topLeft[1];
 
-                    // Si es la primera imagen, no hacer comparación
-                    if (!lastImageData) {
-                        lastImageData = currentImageData;
-                        return;
-                    }
+      // Dibujar un círculo alrededor de la cara
+      ctx.beginPath();
+      ctx.arc(x + width / 2, y + height / 2, Math.min(width, height) / 2, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'green';
+      ctx.lineWidth = 5;
+      ctx.stroke();
 
-                    let movementDetected = false;
-                    let diffThreshold = 10000;  // Valor umbral para detectar movimiento
+      // Mostrar el mensaje de éxito
+      message.textContent = '¡Rostro Detectado!';
+    } else {
+      // Limpiar el mensaje si no se detecta rostro
+      message.textContent = '';
+    }
+  }
+</script>
 
-                    // Comparar píxeles actuales con los anteriores
-                    for (let i = 0; i < currentPixels.length; i += 4) {
-                        const r1 = lastImageData.data[i];
-                        const g1 = lastImageData.data[i + 1];
-                        const b1 = lastImageData.data[i + 2];
-                        const r2 = currentPixels[i];
-                        const g2 = currentPixels[i + 1];
-                        const b2 = currentPixels[i + 2];
-
-                        const diff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
-                        if (diff > diffThreshold) {
-                            movementDetected = true;
-                            break;
-                        }
-                    }
-
-                    // Si se detecta movimiento, mostrar un mensaje
-                    if (movementDetected) {
-                        console.log('¡Movimiento detectado!');
-                    }
-
-                    // Actualizar la imagen anterior
-                    lastImageData = currentImageData;
-
-                    requestAnimationFrame(detectMotion);
-                }
-
-                detectMotion();
-            } catch (error) {
-                console.error("No se pudo acceder a la cámara:", error);
-            }
-        }
-
-        startVideo();
-    </script>
 </body>
 </html>
