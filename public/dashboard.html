@@ -130,69 +130,50 @@
             }
         }
 
-        // Función para comparar las fotos
-        function comparePhotos() {
+        // Función para comparar las fotos usando face-api.js
+        async function comparePhotos() {
             if (!referenceImage || !currentImage) {
                 alert("No se han tomado ambas fotos.");
                 return;
             }
 
-            if (compareImages(referenceImage, currentImage)) {
-                alert("¡Es la misma persona!");
-            } else {
-                alert("No es la misma persona.");
-            }
-        }
-
-        // Función para comparar dos imágenes (simplificada, por píxeles)
-        function compareImages(img1, img2) {
-            const canvas1 = document.createElement("canvas");
-            const canvas2 = document.createElement("canvas");
-
+            // Crear elementos de imagen para las fotos
             const imgElement1 = new Image();
             const imgElement2 = new Image();
 
-            imgElement1.src = img1;
-            imgElement2.src = img2;
+            imgElement1.src = referenceImage;
+            imgElement2.src = currentImage;
 
             // Esperamos a que ambas imágenes estén cargadas
-            imgElement1.onload = () => {
-                imgElement2.onload = () => {
-                    canvas1.width = imgElement1.width;
-                    canvas1.height = imgElement1.height;
-                    canvas2.width = imgElement2.width;
-                    canvas2.height = imgElement2.height;
-
-                    canvas1.getContext("2d").drawImage(imgElement1, 0, 0);
-                    canvas2.getContext("2d").drawImage(imgElement2, 0, 0);
-
-                    const data1 = canvas1.getContext("2d").getImageData(0, 0, canvas1.width, canvas1.height);
-                    const data2 = canvas2.getContext("2d").getImageData(0, 0, canvas2.width, canvas2.height);
-
-                    let diff = 0;
-                    const length = data1.data.length;
-
-                    for (let i = 0; i < length; i += 4) {
-                        const r1 = data1.data[i];
-                        const g1 = data1.data[i + 1];
-                        const b1 = data1.data[i + 2];
-
-                        const r2 = data2.data[i];
-                        const g2 = data2.data[i + 1];
-                        const b2 = data2.data[i + 2];
-
-                        diff += Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
-                    }
-
-                    // Umbral de tolerancia de diferencia
-                    const threshold = 100000; // Puedes ajustar este valor
-                    if (diff < threshold) {
-                        return true; // Las imágenes son similares
+            imgElement1.onload = async () => {
+                imgElement2.onload = async () => {
+                    const result = await compareFaceImages(imgElement1, imgElement2);
+                    if (result) {
+                        alert("¡Es la misma persona!");
                     } else {
-                        return false; // Las imágenes no son similares
+                        alert("No es la misma persona.");
                     }
                 };
             };
+        }
+
+        // Función para comparar las caras usando face-api.js
+        async function compareFaceImages(img1, img2) {
+            // Detectar las caras en ambas imágenes
+            const detections1 = await faceapi.detectSingleFace(img1).withFaceLandmarks().withFaceDescriptor();
+            const detections2 = await faceapi.detectSingleFace(img2).withFaceLandmarks().withFaceDescriptor();
+
+            // Si no se detectó una cara en una de las imágenes, retornar false
+            if (!detections1 || !detections2) {
+                return false;
+            }
+
+            // Calcular la "distancia" entre las características faciales
+            const distance = faceapi.euclideanDistance(detections1.descriptor, detections2.descriptor);
+
+            // Definir un umbral de comparación. Si la distancia es menor a 0.6, las caras coinciden
+            const threshold = 0.6;
+            return distance < threshold; // Si la distancia es menor que el umbral, son las mismas personas
         }
 
         // Iniciar escucha cuando la página cargue
