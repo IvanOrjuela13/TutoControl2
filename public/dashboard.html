@@ -13,7 +13,7 @@
         }
         #video {
             width: 100%;
-            max-width: 300px;
+            max-width: 200px;
             border: 2px solid black;
         }
         #canvas, #photo {
@@ -21,7 +21,7 @@
         }
         #takenPhoto, #photoValidation {
             width: 100%;
-            max-width: 300px;
+            max-width: 200px;
             border: 2px solid green;
             margin-top: 10px;
         }
@@ -45,6 +45,7 @@
     <canvas id="canvas"></canvas>
     <img id="takenPhoto" src="" alt="Foto tomada" />
     <br />
+    <button class="btn" id="takePhotoButton">Tomar Foto</button>
     <button class="btn" id="checkButton" style="display:none;">Verificar Foto</button>
     <br />
     <img id="photoValidation" src="" alt="Foto para verificación" />
@@ -53,6 +54,7 @@
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
         const takenPhoto = document.getElementById("takenPhoto");
+        const takePhotoButton = document.getElementById("takePhotoButton");
         const checkButton = document.getElementById("checkButton");
         const photoValidation = document.getElementById("photoValidation");
 
@@ -117,6 +119,9 @@
                 photoValidation.style.display = "block"; // Mostrar la foto de la nueva imagen
             }
         }
+
+        // Tomar foto al hacer clic en el botón
+        takePhotoButton.addEventListener("click", capturePhoto);
 
         // Verificar si la nueva foto coincide con la referencia
         checkButton.addEventListener("click", () => {
