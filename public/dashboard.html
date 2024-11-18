@@ -3,158 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detección de Cara y Reconocimiento de Voz</title>
+    <title>Reconocimiento Facial y Voz</title>
     <style>
         body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            height: 100vh;
-            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            text-align: center;
         }
-        video {
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-            width: 640px;
-            height: 480px;
+        #video {
+            width: 100%;
+            max-width: 400px;
+            border: 2px solid black;
         }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #canvas, #photo {
+            display: none;
         }
-        #message {
-            margin-top: 20px;
-            font-size: 20px;
-            color: green;
+        #takenPhoto {
+            width: 100%;
+            max-width: 400px;
+            border: 2px solid green;
+            margin-top: 10px;
         }
-        #capturedImageContainer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        img {
-            max-width: 300px; /* Hacemos que la imagen capturada sea más pequeña */
+        .btn {
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
+    <h1>Reconocimiento Facial y Voz</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+    <img id="takenPhoto" src="" alt="Foto tomada" />
+    <br />
+    <button class="btn" id="checkButton" style="display:none;">Verificar Foto</button>
 
-<h1>Detección de Cara y Reconocimiento de Voz</h1>
-<video id="videoElement" autoplay playsinline></video>
-<p id="message">Esperando reconocimiento...</p>
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const takenPhoto = document.getElementById("takenPhoto");
+        const checkButton = document.getElementById("checkButton");
 
-<!-- Contenedor para la imagen capturada -->
-<div id="capturedImageContainer"></div>
+        let referenceImage = null;
 
-<script>
-    const videoElement = document.getElementById('videoElement');
-    const message = document.getElementById('message');
-    const capturedImageContainer = document.getElementById('capturedImageContainer');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    let displaySize;
-
-    // Configurar y cargar la cámara
-    async function setup() {
-        await startCamera();
-        setupVoiceRecognition(); // Inicializamos el reconocimiento de voz
-    }
-
-    // Activar la cámara
-    async function startCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user' }
+        // Acceder a la cámara
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                alert("No se pudo acceder a la cámara: " + err);
             });
-            videoElement.srcObject = stream;
 
-            videoElement.onloadeddata = () => {
-                displaySize = { width: videoElement.videoWidth, height: videoElement.videoHeight };
-                canvas.width = displaySize.width;
-                canvas.height = displaySize.height;
-                detectFace();
-            };
-        } catch (err) {
-            console.error('Error al acceder a la cámara: ', err);
-            alert('No se pudo acceder a la cámara.');
-        }
-    }
-
-    // Función para detectar la cara (simulada)
-    async function detectFace() {
-        const faceDetected = detectFaceInCanvas();
-        
-        // Llamar a la función de detección en cada ciclo de animación
-        setTimeout(detectFace, 100);
-    }
-
-    // Función rudimentaria para detectar la cara (simulada con un área cuadrada)
-    function detectFaceInCanvas() {
-        // Obtenemos los píxeles del video
-        const width = videoElement.videoWidth;
-        const height = videoElement.videoHeight;
-
-        // Definimos un área aproximada para la cara (simulada)
-        const simulatedFace = { x: width / 4, y: height / 4, width: width / 2, height: height / 2 };
-
-        return simulatedFace;
-    }
-
-    // Captura la foto y la muestra más pequeña
-    function capturePhoto() {
-        // Establecemos las dimensiones correctas para el canvas
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        
-        // Dibujamos el contenido del video en el canvas
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        // Convertimos el contenido del canvas a una imagen
-        const dataUrl = canvas.toDataURL('image/png');
-
-        // Creamos un nuevo elemento de imagen
-        const capturedImage = document.createElement('img');
-        capturedImage.src = dataUrl;
-        capturedImage.style.maxWidth = '300px'; // Hacemos que la imagen sea más pequeña
-        capturedImage.style.marginTop = '20px';
-
-        // Limpiamos cualquier imagen anterior y agregamos la nueva
-        capturedImageContainer.innerHTML = ''; 
-        capturedImageContainer.appendChild(capturedImage);
-
-        // Actualizamos el mensaje
-        message.textContent = '¡Foto tomada!'; // Mensaje de confirmación
-    }
-
-    // Inicializar el reconocimiento de voz
-    function setupVoiceRecognition() {
+        // Configurar el reconocimiento de voz
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'es-ES'; // Configuramos el idioma a español
-        recognition.continuous = false; // No escuchamos de forma continua
-        recognition.interimResults = false; // No queremos resultados intermedios
+        recognition.lang = "es-ES";
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
 
-        // Cuando se detecta un comando de voz
+        // Función para empezar a escuchar
+        recognition.onstart = () => {
+            console.log("Escuchando...");
+        };
+
+        // Cuando se detecta una palabra
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase();
-            console.log('Reconocido:', transcript);
+            const command = event.results[0][0].transcript.toLowerCase();
+            console.log("Comando recibido: ", command);
 
-            if (transcript.includes('foto')) {
-                // Si se dice "foto", capturamos la imagen
+            // Si el comando es "foto", toma la foto
+            if (command.includes("foto")) {
                 capturePhoto();
-                message.textContent = '¡Foto tomada! Reconocida con la voz.';
             }
         };
 
-        // Iniciar la escucha
-        recognition.start();
-    }
+        // Iniciar el reconocimiento de voz
+        function startListening() {
+            recognition.start();
+        }
 
-    // Iniciar el proceso
-    setup();
-</script>
+        // Capturar la foto
+        function capturePhoto() {
+            const context = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+            const imgData = canvas.toDataURL("image/png");
+            takenPhoto.src = imgData;
+            takenPhoto.style.display = "block";
+
+            // Si es la primera foto, la guardamos como referencia
+            if (!referenceImage) {
+                referenceImage = imgData;
+                checkButton.style.display = "block"; // Mostrar el botón de verificación
+                alert("Foto tomada como referencia. ¡Ahora puedes tomar una nueva foto para verificar!");
+            }
+        }
+
+        // Verificar si la nueva foto coincide con la referencia
+        checkButton.addEventListener("click", () => {
+            if (!referenceImage) {
+                alert("No se ha tomado ninguna foto de referencia.");
+                return;
+            }
+
+            const context = canvas.getContext("2d");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const newPhotoData = canvas.toDataURL("image/png");
+
+            // Comparar las dos imágenes
+            if (compareImages(referenceImage, newPhotoData)) {
+                alert("¡Es la misma persona!");
+            } else {
+                alert("No es la misma persona.");
+            }
+        });
+
+        // Función para comparar dos imágenes (simplificada, por píxeles)
+        function compareImages(img1, img2) {
+            const canvas1 = document.createElement("canvas");
+            const canvas2 = document.createElement("canvas");
+
+            const imgElement1 = new Image();
+            const imgElement2 = new Image();
+
+            imgElement1.src = img1;
+            imgElement2.src = img2;
+
+            // Esperamos a que ambas imágenes estén cargadas
+            imgElement1.onload = () => {
+                imgElement2.onload = () => {
+                    canvas1.width = imgElement1.width;
+                    canvas1.height = imgElement1.height;
+                    canvas2.width = imgElement2.width;
+                    canvas2.height = imgElement2.height;
+
+                    canvas1.getContext("2d").drawImage(imgElement1, 0, 0);
+                    canvas2.getContext("2d").drawImage(imgElement2, 0, 0);
+
+                    const data1 = canvas1.getContext("2d").getImageData(0, 0, canvas1.width, canvas1.height);
+                    const data2 = canvas2.getContext("2d").getImageData(0, 0, canvas2.width, canvas2.height);
+
+                    let diff = 0;
+                    const length = data1.data.length;
+
+                    for (let i = 0; i < length; i += 4) {
+                        const r1 = data1.data[i];
+                        const g1 = data1.data[i + 1];
+                        const b1 = data1.data[i + 2];
+
+                        const r2 = data2.data[i];
+                        const g2 = data2.data[i + 1];
+                        const b2 = data2.data[i + 2];
+
+                        diff += Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+                    }
+
+                    // Umbral de tolerancia de diferencia
+                    const threshold = 100000; // Puedes ajustar este valor
+                    if (diff < threshold) {
+                        return true; // Las imágenes son similares
+                    } else {
+                        return false; // Las imágenes no son similares
+                    }
+                };
+            };
+        }
+
+        // Iniciar escucha cuando la página cargue
+        window.onload = () => {
+            startListening();
+        };
+    </script>
 </body>
 </html>
