@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detección de Rostros con MediaPipe</title>
+    <title>Detección de Rostros</title>
     <style>
         body {
             margin: 0;
@@ -24,22 +24,12 @@
             position: absolute;
             z-index: 1;
         }
-        #message {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            color: green;
-            z-index: 2;
-        }
     </style>
 </head>
 <body>
 
 <video id="videoElement" autoplay playsinline></video>
 <canvas id="canvas"></canvas>
-<div id="message"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
@@ -47,7 +37,6 @@
     let videoElement = document.getElementById('videoElement');
     let canvas = document.getElementById('canvas');
     let ctx = canvas.getContext('2d');
-    let message = document.getElementById('message');
   
     // Configuración de la cámara
     async function setupCamera() {
@@ -103,12 +92,6 @@
             ctx.strokeStyle = 'green';
             ctx.lineWidth = 5;
             ctx.stroke();
-
-            // Mostrar el mensaje de éxito
-            message.textContent = '¡Rostro Detectado!';
-        } else {
-            // Limpiar el mensaje si no se detecta rostro
-            message.textContent = '';
         }
     }
 
