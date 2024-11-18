@@ -50,6 +50,7 @@
     <br />
     <img id="photoValidation" src="" alt="Foto para verificación" />
     
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
     <script>
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
@@ -61,6 +62,13 @@
         let referenceImage = null;
         let currentImage = null;
         let photoCaptured = false; // Flag para asegurarnos de que se captura la primera foto
+
+        // Cargar modelos de face-api.js
+        async function loadModels() {
+            await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+        }
 
         // Acceder a la cámara
         navigator.mediaDevices.getUserMedia({ video: true })
@@ -165,6 +173,7 @@
 
             // Si no se detectó una cara en una de las imágenes, retornar false
             if (!detections1 || !detections2) {
+                alert("No se detectó una cara en una de las imágenes.");
                 return false;
             }
 
@@ -177,7 +186,8 @@
         }
 
         // Iniciar escucha cuando la página cargue
-        window.onload = () => {
+        window.onload = async () => {
+            await loadModels();  // Asegurarse de que los modelos de face-api.js estén cargados
             startListening();
         };
     </script>
