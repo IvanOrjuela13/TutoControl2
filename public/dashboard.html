@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detección de Cara y Voz</title>
+    <title>Detección de Cara y Reconocimiento de Voz</title>
     <style>
         body {
             display: flex;
@@ -20,12 +20,6 @@
             width: 640px;
             height: 480px;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin-top: 10px;
-            cursor: pointer;
-        }
         canvas {
             position: absolute;
             top: 0;
@@ -36,9 +30,13 @@
             font-size: 20px;
             color: green;
         }
+        #capturedImageContainer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
         img {
             max-width: 300px; /* Hacemos que la imagen capturada sea más pequeña */
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -46,19 +44,16 @@
 
 <h1>Detección de Cara y Reconocimiento de Voz</h1>
 <video id="videoElement" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
-<button id="captureButton">Capturar Foto</button>
-<p id="message"></p>
+<p id="message">Esperando reconocimiento...</p>
 
 <!-- Contenedor para la imagen capturada -->
 <div id="capturedImageContainer"></div>
 
 <script>
     const videoElement = document.getElementById('videoElement');
-    const canvas = document.getElementById('canvas');
-    const captureButton = document.getElementById('captureButton');
     const message = document.getElementById('message');
     const capturedImageContainer = document.getElementById('capturedImageContainer');
+    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     let displaySize;
 
@@ -92,20 +87,6 @@
     async function detectFace() {
         const faceDetected = detectFaceInCanvas();
         
-        // Dibujar el círculo de la cara en el canvas
-        if (faceDetected) {
-            ctx.beginPath();
-            ctx.arc(faceDetected.x + faceDetected.width / 2, faceDetected.y + faceDetected.height / 2, Math.max(faceDetected.width, faceDetected.height) / 2, 0, 2 * Math.PI);
-            ctx.strokeStyle = 'green'; // Color del círculo
-            ctx.lineWidth = 4;
-            ctx.stroke();
-            ctx.closePath();
-
-            message.textContent = '¡Cara detectada! Dile "foto" para capturar.';
-        } else {
-            message.textContent = 'Esperando cara...';
-        }
-
         // Llamar a la función de detección en cada ciclo de animación
         setTimeout(detectFace, 100);
     }
@@ -123,7 +104,7 @@
     }
 
     // Captura la foto y la muestra más pequeña
-    captureButton.addEventListener('click', () => {
+    function capturePhoto() {
         const dataUrl = canvas.toDataURL('image/png');
         const capturedImage = document.createElement('img');
         capturedImage.src = dataUrl;
@@ -131,7 +112,8 @@
         capturedImage.style.marginTop = '20px';
         capturedImageContainer.innerHTML = ''; // Limpiar cualquier imagen anterior
         capturedImageContainer.appendChild(capturedImage);
-    });
+        message.textContent = '¡Foto tomada!'; // Mensaje de confirmación
+    }
 
     // Inicializar el reconocimiento de voz
     function setupVoiceRecognition() {
@@ -147,7 +129,7 @@
 
             if (transcript.includes('foto')) {
                 // Si se dice "foto", capturamos la imagen
-                captureButton.click(); 
+                capturePhoto();
                 message.textContent = '¡Foto tomada! Reconocida con la voz.';
             }
         };
