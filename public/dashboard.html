@@ -1,195 +1,123 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reconocimiento Facial y Voz</title>
+    <title>Captura Automática de Foto</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        #video {
-            width: 100%;
-            max-width: 200px;
+        #video, #canvas {
+            display: block;
+            margin: 10px auto;
             border: 2px solid black;
+            max-width: 90%;
         }
-        #canvas, #photo {
-            display: none;
-        }
-        #takenPhoto, #photoValidation {
-            width: 100%;
-            max-width: 200px;
-            border: 2px solid green;
-            margin-top: 10px;
-        }
-        .btn {
-            padding: 8px 16px;
-            background-color: #28a745;
-            color: white;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background-color: #218838;
+        #takenPhoto {
+            display: block;
+            margin: 20px auto;
+            max-width: 90%;
         }
     </style>
 </head>
 <body>
-    <h1>Reconocimiento Facial y Voz</h1>
+    <h1 style="text-align: center;">Captura Automática de Foto</h1>
     <video id="video" autoplay></video>
-    <canvas id="canvas"></canvas>
-    <img id="takenPhoto" src="" alt="Foto tomada" />
-    <br />
-    <button class="btn" id="takePhotoButton" style="display:none;">Tomar Foto</button>
-    <button class="btn" id="checkButton" style="display:none;">Verificar Foto</button>
-    <br />
-    <img id="photoValidation" src="" alt="Foto para verificación" />
-    
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <img id="takenPhoto" alt="Foto tomada aparecerá aquí" />
+
     <script>
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
         const takenPhoto = document.getElementById("takenPhoto");
-        const takePhotoButton = document.getElementById("takePhotoButton");
-        const checkButton = document.getElementById("checkButton");
-        const photoValidation = document.getElementById("photoValidation");
+        const context = canvas.getContext("2d");
 
-        let referenceImage = null;
-        let currentImage = null;
-        let photoCaptured = false; // Flag para asegurarnos de que se captura la primera foto
-
-        // Cargar modelos de face-api.js desde el CDN
-        async function loadModels() {
-            await faceapi.nets.ssdMobilenetv1.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/weights/ssdMobilenetv1');
-            await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/weights/faceLandmark68Net');
-            await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/weights/faceRecognitionNet');
-        }
+        let photoCaptured = false; // Flag para saber si ya se tomó la foto
+        let timer = null; // Para el temporizador de un minuto
+        let previousFrame = null; // Para comparar frames consecutivos
 
         // Acceder a la cámara
         navigator.mediaDevices.getUserMedia({ video: true })
             .then(stream => {
                 video.srcObject = stream;
+                video.addEventListener("play", startDetection);
             })
             .catch(err => {
                 alert("No se pudo acceder a la cámara: " + err);
             });
 
-        // Configurar el reconocimiento de voz
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = "es-ES";
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
-        // Función para empezar a escuchar
-        recognition.onstart = () => {
-            console.log("Escuchando...");
-        };
-
-        // Cuando se detecta una palabra
-        recognition.onresult = (event) => {
-            const command = event.results[0][0].transcript.toLowerCase();
-            console.log("Comando recibido: ", command);
-
-            // Si el comando es "foto"
-            if (command.includes("foto")) {
+        // Iniciar el temporizador de un minuto
+        function startTimer() {
+            timer = setTimeout(() => {
                 if (!photoCaptured) {
-                    capturePhoto(); // Tomar la primera foto (como referencia)
-                    recognition.stop(); // Detener reconocimiento para esperar el siguiente comando
-                    setTimeout(() => {
-                        startListening(); // Reiniciar el reconocimiento de voz para esperar la segunda foto
-                    }, 1000);
-                } else {
-                    capturePhoto(); // Tomar la segunda foto
-                    setTimeout(comparePhotos, 1000); // Comparar después de un segundo
+                    alert("Tiempo agotado. No se detectó actividad.");
                 }
-            }
-        };
-
-        // Iniciar el reconocimiento de voz
-        function startListening() {
-            recognition.start();
+            }, 60000); // 60 segundos
         }
 
-        // Capturar la foto
-        function capturePhoto() {
-            const context = canvas.getContext("2d");
+        // Iniciar detección de movimiento
+        function startDetection() {
+            startTimer(); // Iniciar el temporizador de un minuto
+            detectMotion();
+        }
+
+        function detectMotion() {
+            if (photoCaptured) return; // Detener si ya se tomó la foto
+
+            // Dibujar el frame actual en el canvas
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const imgData = canvas.toDataURL("image/png");
-            takenPhoto.src = imgData;
-            takenPhoto.style.display = "block";
+            const currentFrame = context.getImageData(0, 0, canvas.width, canvas.height);
 
-            // Si es la primera foto, la guardamos como referencia
-            if (!photoCaptured) {
-                referenceImage = imgData;
-                photoCaptured = true; // Marcar que ya se ha tomado la primera foto
-                alert("Foto tomada como referencia. ¡Ahora di 'foto' de nuevo para verificar!");
-            } else {
-                currentImage = imgData;
-                photoValidation.src = currentImage;
-                photoValidation.style.display = "block"; // Mostrar la foto de la nueva imagen
-            }
-        }
-
-        // Función para comparar las fotos usando face-api.js
-        async function comparePhotos() {
-            if (!referenceImage || !currentImage) {
-                alert("No se han tomado ambas fotos.");
-                return;
+            // Comparar con el frame anterior para detectar cambios
+            if (previousFrame) {
+                const motionDetected = compareFrames(previousFrame.data, currentFrame.data);
+                if (motionDetected) {
+                    capturePhoto(); // Tomar la foto si se detecta movimiento
+                    return;
+                }
             }
 
-            // Crear elementos de imagen para las fotos
-            const imgElement1 = new Image();
-            const imgElement2 = new Image();
+            // Guardar el frame actual como referencia para la próxima comparación
+            previousFrame = currentFrame;
 
-            imgElement1.src = referenceImage;
-            imgElement2.src = currentImage;
-
-            // Esperamos a que ambas imágenes estén cargadas
-            imgElement1.onload = async () => {
-                imgElement2.onload = async () => {
-                    const result = await compareFaceImages(imgElement1, imgElement2);
-                    if (result) {
-                        alert("¡Es la misma persona!");
-                    } else {
-                        alert("No es la misma persona.");
-                    }
-                };
-            };
+            // Continuar detectando en el siguiente frame
+            requestAnimationFrame(detectMotion);
         }
 
-        // Función para comparar las caras usando face-api.js
-        async function compareFaceImages(img1, img2) {
-            // Detectar las caras en ambas imágenes
-            const detections1 = await faceapi.detectSingleFace(img1).withFaceLandmarks().withFaceDescriptor();
-            const detections2 = await faceapi.detectSingleFace(img2).withFaceLandmarks().withFaceDescriptor();
+        // Comparar dos frames
+        function compareFrames(frame1, frame2) {
+            let diff = 0;
 
-            // Si no se detectó una cara en una de las imágenes, retornar false
-            if (!detections1 || !detections2) {
-                alert("No se detectó una cara en una de las imágenes.");
-                return false;
+            // Comparar cada píxel (canales R, G, B)
+            for (let i = 0; i < frame1.length; i += 4) {
+                diff += Math.abs(frame1[i] - frame2[i]);     // Canal Rojo
+                diff += Math.abs(frame1[i + 1] - frame2[i + 1]); // Canal Verde
+                diff += Math.abs(frame1[i + 2] - frame2[i + 2]); // Canal Azul
             }
 
-            // Calcular la "distancia" entre las características faciales
-            const distance = faceapi.euclideanDistance(detections1.descriptor, detections2.descriptor);
-
-            // Definir un umbral de comparación. Si la distancia es menor a 0.6, las caras coinciden
-            const threshold = 0.6;
-            return distance < threshold; // Si la distancia es menor que el umbral, son las mismas personas
+            // Calcular un umbral para detectar movimiento
+            const averageDiff = diff / (frame1.length / 4);
+            return averageDiff > 20; // Ajustar umbral según sensibilidad
         }
 
-        // Iniciar escucha cuando la página cargue
-        window.onload = async () => {
-            await loadModels();  // Asegurarse de que los modelos de face-api.js estén cargados
-            startListening();
-        };
+        // Capturar la foto
+        function capturePhoto() {
+            if (photoCaptured) return; // Evitar capturas múltiples
+
+            // Dibujar el frame actual en el canvas y generar la foto
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const photo = canvas.toDataURL("image/png");
+
+            // Mostrar la foto capturada
+            takenPhoto.src = photo;
+            photoCaptured = true;
+
+            alert("Foto tomada automáticamente.");
+            clearTimeout(timer); // Detener el temporizador
+        }
     </script>
 </body>
 </html>
