@@ -20,107 +20,136 @@
         }
         h2 {
             color: #343a40;
+            margin-bottom: 20px;
             text-align: center;
-        }
-        #camera {
-            width: 100%;
-            height: 200px;
-            border: 1px solid #ccc;
-            margin-top: 15px;
-        }
-        #snapshot {
-            display: none;
-            width: 100%;
-            margin-top: 15px;
         }
         .btn {
             margin: 10px 0;
             width: 100%;
         }
+        #video {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        canvas {
+            display: none;
+        }
         #locationDisplay {
             margin-top: 15px;
             padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
             background-color: #e9ecef;
+        }
+        #location {
+            font-size: 16px;
+            color: #555;
+        }
+        #message {
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <h2>Dashboard</h2>
-        <video id="camera" autoplay></video>
-        <canvas id="snapshot"></canvas>
-        <button id="entradaBtn" class="btn btn-success">Registro de Entrada</button>
-        <button id="salidaBtn" class="btn btn-danger">Registro de Salida</button>
-        <button id="logoutBtn" class="btn btn-warning">Cerrar Sesión</button>
+        <div class="text-center">
+            <button id="entradaBtn" class="btn btn-success">Registro de Entrada</button>
+            <button id="salidaBtn" class="btn btn-danger">Registro de Salida</button>
+            <button id="logoutBtn" class="btn btn-warning">Cerrar Sesión</button>
+        </div>
+        <video id="video" autoplay></video>
+        <canvas id="canvas"></canvas>
         <div id="locationDisplay">
-            <p>Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
-            <p>Fecha y Hora: <span id="dateTime">-</span></p>
+            <h5>Ubicación Actual:</h5>
+            <p id="location">Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
         </div>
         <div id="message"></div>
     </div>
 
     <script>
-        const camera = document.getElementById('camera');
-        const snapshot = document.getElementById('snapshot');
-        const ctx = snapshot.getContext('2d');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const maxDistance = 800; // Distancia máxima en metros desde la ubicación permitida
+        const referenceLocation = { lat: 4.405805, lng: -75.283747 };
 
-        // Activar cámara
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => { camera.srcObject = stream; })
-            .catch(err => { console.error("Error al acceder a la cámara:", err); });
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+            }
+        }
 
-        // Obtener ubicación
-        async function getLocation() {
+        function capturePhoto() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/png');
+        }
+
+        function getLocation() {
             return new Promise((resolve, reject) => {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 } else {
-                    reject("Geolocalización no soportada.");
+                    reject("La geolocalización no es soportada por este navegador.");
                 }
             });
         }
 
-        function capturePhoto() {
-            snapshot.width = camera.videoWidth;
-            snapshot.height = camera.videoHeight;
-            ctx.drawImage(camera, 0, 0);
-            return snapshot.toDataURL('image/png');
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radio de la Tierra en km
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c * 1000; // Convertir a metros
         }
 
-        async function registrarAccion(tipo) {
+        async function handleRegistro(tipo) {
             try {
                 const position = await getLocation();
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-                const timestamp = new Date().toLocaleString();
+                const distance = calculateDistance(lat, lng, referenceLocation.lat, referenceLocation.lng);
+
+                if (distance > maxDistance) {
+                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">Debe estar cerca de la ubicación permitida para registrar ${tipo}.</div>`;
+                    return;
+                }
+
                 const photo = capturePhoto();
-
-                document.getElementById('latitude').textContent = lat.toFixed(6);
-                document.getElementById('longitude').textContent = lng.toFixed(6);
-                document.getElementById('dateTime').textContent = timestamp;
-
+                const userId = 'ID_DEL_USUARIO'; // Cambia esto con el ID del usuario actual
                 const response = await fetch(`/api/registro/${tipo}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
+                        userId, 
                         ubicacion: { lat, lng }, 
-                        timestamp, 
                         foto: photo 
                     }),
                 });
                 const data = await response.json();
                 document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
             } catch (error) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error al registrar ${tipo}.</div>`;
+                console.error(error);
             }
         }
 
-        document.getElementById('entradaBtn').addEventListener('click', () => registrarAccion('entrada'));
-        document.getElementById('salidaBtn').addEventListener('click', () => registrarAccion('salida'));
+        document.getElementById('entradaBtn').addEventListener('click', () => handleRegistro('entrada'));
+        document.getElementById('salidaBtn').addEventListener('click', () => handleRegistro('salida'));
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
-            setTimeout(() => { window.location.href = '/login.html'; }, 1000);
+            window.location.href = '/login.html';
         });
+
+        startCamera();
     </script>
 </body>
 </html>
