@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+public/dashboard.html <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -17,23 +17,27 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .container:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         h2 {
             color: #343a40;
             margin-bottom: 20px;
+            font-size: 24px;
             text-align: center;
         }
         .btn {
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
             margin: 10px 0;
             width: 100%;
+            transition: transform 0.2s;
         }
-        #video {
-            width: 100%;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        canvas {
-            display: none;
+        .btn:hover {
+            transform: scale(1.05);
         }
         #locationDisplay {
             margin-top: 15px;
@@ -41,10 +45,21 @@
             border: 1px solid #ccc;
             border-radius: 10px;
             background-color: #e9ecef;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #locationDisplay h5 {
+            color: #343a40;
+            font-size: 18px;
+            margin-bottom: 10px;
         }
         #location {
             font-size: 16px;
             color: #555;
+        }
+        #timestamp {
+            font-size: 14px;
+            color: #777;
         }
         #message {
             margin-top: 15px;
@@ -53,43 +68,28 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Dashboard</h2>
+        <h2 class="text-center">Dashboard <i class="fas fa-tachometer-alt"></i></h2>
         <div class="text-center">
-            <button id="entradaBtn" class="btn btn-success">Registro de Entrada</button>
-            <button id="salidaBtn" class="btn btn-danger">Registro de Salida</button>
-            <button id="logoutBtn" class="btn btn-warning">Cerrar Sesión</button>
+            <button id="entradaBtn" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Registro de Entrada</button>
+            <button id="salidaBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Registro de Salida</button>
+            <button id="logoutBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
         </div>
-        <video id="video" autoplay></video>
-        <canvas id="canvas"></canvas>
-        <div id="locationDisplay">
+
+        <div id="locationDisplay" class="mt-3">
             <h5>Ubicación Actual:</h5>
             <p id="location">Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
+            <p id="timestamp">Fecha y Hora: <span id="dateTime">-</span></p>
         </div>
-        <div id="message"></div>
+
+        <div id="message" class="mt-3"></div>
     </div>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const maxDistance = 800; // Distancia máxima en metros desde la ubicación permitida
-        const referenceLocation = { lat: 4.405805, lng: -75.283747 };
-
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (error) {
-                console.error('Error al acceder a la cámara:', error);
-            }
-        }
-
-        function capturePhoto() {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            return canvas.toDataURL('image/png');
-        }
+        const referenceLocation = {
+            lat: 4.405805,
+            lng: -75.283747,
+        };
+        const maxDistance = 800; // Distancia máxima en metros
 
         function getLocation() {
             return new Promise((resolve, reject) => {
@@ -109,47 +109,80 @@
                       Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c * 1000; // Convertir a metros
+            const distance = R * c * 1000; // Convertir a metros
+            return distance;
         }
 
-        async function handleRegistro(tipo) {
+        function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const distance = calculateDistance(lat, lng, referenceLocation.lat, referenceLocation.lng);
+
+            document.getElementById('latitude').textContent = lat.toFixed(6);
+            document.getElementById('longitude').textContent = lng.toFixed(6);
+            document.getElementById('dateTime').textContent = new Date().toLocaleString();
+
+            return distance <= maxDistance;
+        }
+
+        function showError(error) {
+            document.getElementById('location').innerHTML = "Error al obtener la ubicación.";
+        }
+
+        document.getElementById('entradaBtn').addEventListener('click', async () => {
             try {
                 const position = await getLocation();
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                const distance = calculateDistance(lat, lng, referenceLocation.lat, referenceLocation.lng);
+                const isWithinAllowedDistance = showPosition(position);
 
-                if (distance > maxDistance) {
-                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">Debe estar cerca de la ubicación permitida para registrar ${tipo}.</div>`;
+                if (!isWithinAllowedDistance) {
+                    document.getElementById('message').innerHTML = '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
                     return;
                 }
 
-                const photo = capturePhoto();
-                const userId = 'ID_DEL_USUARIO'; // Cambia esto con el ID del usuario actual
-                const response = await fetch(`/api/registro/${tipo}`, {
+                const userId = 'ID_DEL_USUARIO'; // Reemplaza con el ID del usuario
+                const deviceID = localStorage.getItem('deviceID');
+                const response = await fetch('/api/registro/entrada', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        userId, 
-                        ubicacion: { lat, lng }, 
-                        foto: photo 
-                    }),
+                    body: JSON.stringify({ userId, deviceID, ubicacion: { lat: position.coords.latitude, lng: position.coords.longitude } }),
                 });
                 const data = await response.json();
                 document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
             } catch (error) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error al registrar ${tipo}.</div>`;
-                console.error(error);
+                showError(error);
             }
-        }
-
-        document.getElementById('entradaBtn').addEventListener('click', () => handleRegistro('entrada'));
-        document.getElementById('salidaBtn').addEventListener('click', () => handleRegistro('salida'));
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            window.location.href = '/login.html';
         });
 
-        startCamera();
+        document.getElementById('salidaBtn').addEventListener('click', async () => {
+            try {
+                const position = await getLocation();
+                const isWithinAllowedDistance = showPosition(position);
+
+                if (!isWithinAllowedDistance) {
+                    document.getElementById('message').innerHTML = '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
+                    return;
+                }
+
+                const userId = 'ID_DEL_USUARIO';
+                const deviceID = localStorage.getItem('deviceID');
+                const response = await fetch('/api/registro/salida', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, deviceID, ubicacion: { lat: position.coords.latitude, lng: position.coords.longitude } }),
+                });
+                const data = await response.json();
+                document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
+            } catch (error) {
+                showError(error);
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            setTimeout(() => { window.location.href = '/login.html'; }, 1000);
+        });
+
+        getLocation().then(showPosition).catch(showError);
     </script>
 </body>
 </html>
