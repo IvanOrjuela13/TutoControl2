@@ -5,7 +5,11 @@ const router = express.Router();
 
 // Ruta para registrar entrada
 router.post('/entrada', async (req, res) => {
-    const { userId, deviceID, ubicacion } = req.body;
+    const { userId, deviceID, ubicacion, image } = req.body;
+
+    if (!image) {
+        return res.status(400).json({ msg: 'La imagen es requerida.' });
+    }
 
     try {
         // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
@@ -15,6 +19,7 @@ router.post('/entrada', async (req, res) => {
             userId,
             deviceID,
             ubicacion,
+            image,
             fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
             tipo: 'entrada'
         });
@@ -28,7 +33,11 @@ router.post('/entrada', async (req, res) => {
 
 // Ruta para registrar salida
 router.post('/salida', async (req, res) => {
-    const { userId, deviceID, ubicacion } = req.body;
+    const { userId, deviceID, ubicacion, image } = req.body;
+
+    if (!image) {
+        return res.status(400).json({ msg: 'La imagen es requerida.' });
+    }
 
     try {
         // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
@@ -38,6 +47,7 @@ router.post('/salida', async (req, res) => {
             userId,
             deviceID,
             ubicacion,
+            image,
             fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
             tipo: 'salida'
         });
