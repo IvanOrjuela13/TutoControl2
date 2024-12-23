@@ -7,22 +7,24 @@ const router = express.Router();
 router.post('/entrada', async (req, res) => {
     const { userId, deviceID, ubicacion, image } = req.body;
 
-    if (!image) {
-        return res.status(400).json({ msg: 'La imagen es requerida.' });
-    }
-
     try {
-        // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
+        // Verificar si el campo `image` está presente
+        if (!image) {
+            return res.status(400).json({ msg: 'La imagen es obligatoria' });
+        }
+
+        // Establece la fecha y hora actual en la zona horaria de Bogotá
         let fechaLocal = moment.tz("America/Bogota").subtract(5, 'hours');
 
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
             ubicacion,
-            image,
-            fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
-            tipo: 'entrada'
+            fecha: fechaLocal.toDate(),
+            tipo: 'entrada',
+            image // Guardar la imagen en Base64
         });
+
         await nuevoRegistro.save();
         res.status(201).json({ msg: 'Entrada registrada exitosamente' });
     } catch (error) {
@@ -35,22 +37,24 @@ router.post('/entrada', async (req, res) => {
 router.post('/salida', async (req, res) => {
     const { userId, deviceID, ubicacion, image } = req.body;
 
-    if (!image) {
-        return res.status(400).json({ msg: 'La imagen es requerida.' });
-    }
-
     try {
-        // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
+        // Verificar si el campo `image` está presente
+        if (!image) {
+            return res.status(400).json({ msg: 'La imagen es obligatoria' });
+        }
+
+        // Establece la fecha y hora actual en la zona horaria de Bogotá
         let fechaLocal = moment.tz("America/Bogota").subtract(5, 'hours');
 
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
             ubicacion,
-            image,
-            fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
-            tipo: 'salida'
+            fecha: fechaLocal.toDate(),
+            tipo: 'salida',
+            image // Guardar la imagen en Base64
         });
+
         await nuevoRegistro.save();
         res.status(201).json({ msg: 'Salida registrada exitosamente' });
     } catch (error) {
