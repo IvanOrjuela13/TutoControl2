@@ -156,6 +156,24 @@
             const imageData = canvas.toDataURL("image/png");
 
             document.getElementById("capturedPhoto").src = imageData;
+
+            // Convertir la imagen a Blob y enviarla al servidor
+            const blob = await (await fetch(imageData)).blob();
+            const formData = new FormData();
+            formData.append('photo', blob, 'photo.png');
+
+            const response = await fetch('/api/guardar-imagen', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-success">${result.msg}</div>`;
+            } else {
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${result.msg}</div>`;
+            }
+
             stream.getTracks().forEach(track => track.stop());
         }
 
