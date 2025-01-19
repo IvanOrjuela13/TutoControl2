@@ -102,8 +102,9 @@
 
             try {
                 const response = await fetch(`/api/registro/consultar?tipo=${tipo}&fecha=${fecha}&userId=${userID}`);
-                const data = await response.json();
+                if (!response.ok) throw new Error('Error al consultar registros.');
 
+                const data = await response.json();
                 const registroList = document.getElementById('registroList');
                 registroList.innerHTML = '';
 
@@ -111,7 +112,7 @@
                     data.forEach((registro) => {
                         const li = document.createElement('li');
                         li.className = 'list-group-item';
-                        li.textContent = `Hora: ${registro.hora} - Ubicación: (${registro.ubicacion.lat}, ${registro.ubicacion.lng})`;
+                        li.textContent = `Hora: ${new Date(registro.fecha).toLocaleTimeString()} - Ubicación: (${registro.ubicacion.lat}, ${registro.ubicacion.lng})`;
                         registroList.appendChild(li);
                     });
 
