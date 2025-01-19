@@ -107,6 +107,10 @@
 
         const videoElement = document.createElement("video");
 
+        // Suponiendo que estas variables contienen los valores del usuario autenticado
+        const userName = 'Ivan'; // Reemplaza con la variable que contiene el nombre del usuario
+        const userID = '678d2aee2ec1cbd8499dc892'; // Reemplaza con la variable que contiene el ID del usuario
+
         async function getLocation() {
             if (navigator.geolocation) {
                 return new Promise((resolve, reject) => {
@@ -155,16 +159,16 @@
 
             context.drawImage(videoElement, 0, 0);
             
-            // Agregar texto sobre la imagen
-            const user = 'ID_DEL_USUARIO';
+            // Agregar texto sobre la imagen con el nombre y ID del usuario
             const dateTime = new Date().toLocaleString();
             const location = `Lat: ${document.getElementById('latitude').textContent}, Lng: ${document.getElementById('longitude').textContent}`;
 
             context.font = '20px Arial';
             context.fillStyle = 'white';
-            context.fillText(`Usuario: ${user}`, 10, canvas.height - 60);
-            context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-            context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+            context.fillText(`Usuario: ${userName}`, 10, canvas.height - 60);
+            context.fillText(`ID: ${userID}`, 10, canvas.height - 40);
+            context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 20);
+            context.fillText(`Ubicación: ${location}`, 10, canvas.height);
 
             const imageData = canvas.toDataURL("image/png");
 
@@ -184,7 +188,7 @@
 
                 await capturePhoto();
 
-                const userId = 'ID_DEL_USUARIO';
+                const userId = userID; // Utilizamos el ID del usuario
                 const deviceID = localStorage.getItem('deviceID');
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -207,7 +211,8 @@
         });
 
         getLocation().then(showPosition).catch(error => {
-            document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+            console.error(error);
+            alert('Error al obtener la ubicación.');
         });
     </script>
 </body>
