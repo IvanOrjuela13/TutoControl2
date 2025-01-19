@@ -3,65 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captura de Foto</title>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        #capturedPhoto {
-            max-width: 300px;
-            max-height: 400px;
+        body {
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+        }
+        .container:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #343a40;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+        .btn {
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 10px 0;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        #locationDisplay {
+            margin-top: 15px;
+            padding: 15px;
             border: 1px solid #ccc;
-            margin-top: 20px;
+            border-radius: 10px;
+            background-color: #e9ecef;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #locationDisplay h5 {
+            color: #343a40;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #location {
+            font-size: 16px;
+            color: #555;
+        }
+        #timestamp {
+            font-size: 14px;
+            color: #777;
+        }
+        #message {
+            margin-top: 15px;
+        }
+        #photo {
+            margin-top: 15px;
+            text-align: center;
+        }
+        #photo img {
+            border-radius: 10px;
+            max-width: 80%; /* Ajustamos el tamaño de la imagen */
+            height: auto;
         }
     </style>
 </head>
 <body>
-    <h1>Registro de Entrada/Salida</h1>
-    <video id="videoElement" width="320" height="240" autoplay></video>
-    <button id="captureButton">Capturar Foto</button>
-    <img id="capturedPhoto" src="" alt="Foto Capturada">
-    <div id="message"></div>
+    <div class="container mt-5">
+        <h2 class="text-center">Dashboard <i class="fas fa-tachometer-alt"></i></h2>
+        <div class="text-center">
+            <button id="entradaBtn" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Registro de Entrada</button>
+            <button id="salidaBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Registro de Salida</button>
+            <button id="logoutBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
+        </div>
+
+        <div id="locationDisplay" class="mt-3">
+            <h5>Ubicación Actual:</h5>
+            <p id="location">Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
+            <p id="timestamp">Fecha y Hora: <span id="dateTime">-</span></p>
+        </div>
+
+        <div id="photo">
+            <h5>Foto Capturada:</h5>
+            <img id="capturedPhoto" src="#" alt="Foto no disponible" />
+        </div>
+
+        <div id="message" class="mt-3"></div>
+    </div>
 
     <script>
-        // Función para obtener la ubicación del usuario
+        const referenceLocation = {
+            lat: 4.405805,
+            lng: -75.283747,
+        };
+        const maxDistance = 2000; // Distancia máxima en metros
+
+        const videoElement = document.createElement("video");
+
         async function getLocation() {
-            return new Promise((resolve, reject) => {
-                if (navigator.geolocation) {
+            if (navigator.geolocation) {
+                return new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
-                } else {
-                    reject(new Error("Geolocalización no es soportada por este navegador."));
-                }
-            });
+                });
+            } else {
+                throw new Error("La geolocalización no es soportada por este navegador.");
+            }
         }
 
-        // Función para mostrar la posición
-        async function showPosition(position) {
-            const allowedLocation = { lat: 4.653, lng: -74.099 }; // Ubicación permitida (ejemplo)
-            const distance = calculateDistance(
-                position.coords.latitude, position.coords.longitude,
-                allowedLocation.lat, allowedLocation.lng
-            );
-            return distance < 100; // Permitido si está dentro de 100 metros
-        }
-
-        // Función para calcular la distancia entre dos puntos
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // Radio de la Tierra en metros
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const R = 6371;
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Resultado en metros
+            const distance = R * c * 1000; // Convertir a metros
+            return distance;
         }
 
-        // Función para capturar la foto y agregar el texto
-        async function capturePhoto(userName, userId) {
+        async function showPosition(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const distance = calculateDistance(lat, lng, referenceLocation.lat, referenceLocation.lng);
+
+            document.getElementById('latitude').textContent = lat.toFixed(6);
+            document.getElementById('longitude').textContent = lng.toFixed(6);
+            document.getElementById('dateTime').textContent = new Date().toLocaleString();
+
+            return distance <= maxDistance;
+        }
+
+        async function capturePhoto() {
             const canvas = document.createElement("canvas");
             const context = canvas.getContext("2d");
 
-            const videoElement = document.getElementById("videoElement");
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             videoElement.srcObject = stream;
             videoElement.play();
@@ -71,21 +154,24 @@
             canvas.height = videoElement.videoHeight;
 
             context.drawImage(videoElement, 0, 0);
+            
+            // Agregar texto sobre la imagen
+            const user = 'ID_DEL_USUARIO';
+            const dateTime = new Date().toLocaleString();
+            const location = `Lat: ${document.getElementById('latitude').textContent}, Lng: ${document.getElementById('longitude').textContent}`;
+
+            context.font = '20px Arial';
+            context.fillStyle = 'white';
+            context.fillText(`Usuario: ${user}`, 10, canvas.height - 60);
+            context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+            context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+
             const imageData = canvas.toDataURL("image/png");
 
-            // Agregar texto a la imagen
-            context.font = "30px Arial";
-            context.fillStyle = "white";
-            context.fillText(`Usuario: ${userName}`, 20, 40); // Nombre del usuario
-            context.fillText(`ID: ${userId}`, 20, 80); // ID del usuario
-            context.fillText(`Fecha: ${new Date().toLocaleString()}`, 20, 120); // Fecha y hora
-
-            document.getElementById("capturedPhoto").src = canvas.toDataURL("image/png");
-
+            document.getElementById("capturedPhoto").src = imageData;
             stream.getTracks().forEach(track => track.stop());
         }
 
-        // Función para registrar la entrada o salida
         async function handleRegister(endpoint) {
             try {
                 const position = await getLocation();
@@ -96,14 +182,9 @@
                     return;
                 }
 
-                // Supongamos que tienes el nombre y ID del usuario
-                const userName = 'Iván'; // Aquí deberías tener el nombre real
-                const userId = '123456'; // Aquí deberías tener el ID real
+                await capturePhoto();
 
-                // Captura la foto y agrega el texto
-                await capturePhoto(userName, userId);
-
-                // Guardar el registro en la base de datos (simulado)
+                const userId = 'ID_DEL_USUARIO';
                 const deviceID = localStorage.getItem('deviceID');
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -117,10 +198,16 @@
             }
         }
 
-        // Evento para capturar la foto al presionar el botón
-        document.getElementById("captureButton").addEventListener("click", function() {
-            const endpoint = "/api/register"; // El endpoint donde guardarás los datos
-            handleRegister(endpoint);
+        document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
+        document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            setTimeout(() => { window.location.href = '/login.html'; }, 1000);
+        });
+
+        getLocation().then(showPosition).catch(error => {
+            document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
         });
     </script>
 </body>
