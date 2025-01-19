@@ -82,7 +82,6 @@
             <button id="entradaBtn" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Registro de Entrada</button>
             <button id="salidaBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Registro de Salida</button>
             <button id="logoutBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
-            <button id="consultaBtn" class="btn btn-info"><i class="fas fa-search"></i> Consultar Datos</button>
         </div>
 
         <div id="locationDisplay" class="mt-3">
@@ -203,23 +202,18 @@
             }
         }
 
-        async function handleConsulta() {
-            try {
-                const response = await fetch('/api/consulta', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-                const data = await response.json();
-                document.getElementById('message').innerHTML = `<div class="alert alert-info">Datos consultados con éxito.</div>`;
-                console.log(data);  // Mostrar los datos en consola o de alguna otra forma
-            } catch (error) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-            }
-        }
+        document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
+        document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
 
-        document.getElementById("entradaBtn").addEventListener("click", () => handleRegister('/api/entrada'));
-        document.getElementById("salidaBtn").addEventListener("click", () => handleRegister('/api/salida'));
-        document.getElementById("consultaBtn").addEventListener("click", handleConsulta);
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            setTimeout(() => { window.location.href = '/login.html'; }, 1000);
+        });
+
+        getLocation().then(showPosition).catch(error => {
+            console.error(error);
+            alert('Error al obtener la ubicación.');
+        });
     </script>
 </body>
 </html>
