@@ -1,4 +1,4 @@
-Este es el mío routes/registro.jsconst express = require('express');
+const express = require('express');
 const Registro = require('../models/registro');
 const moment = require('moment-timezone');
 const router = express.Router();
