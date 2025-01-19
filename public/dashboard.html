@@ -70,7 +70,8 @@
         }
         #photo img {
             border-radius: 10px;
-            max-width: 100%;
+            max-width: 80%; /* Ajustamos el tamaño de la imagen */
+            height: auto;
         }
     </style>
 </head>
@@ -153,6 +154,18 @@
             canvas.height = videoElement.videoHeight;
 
             context.drawImage(videoElement, 0, 0);
+            
+            // Agregar texto sobre la imagen
+            const user = 'ID_DEL_USUARIO';
+            const dateTime = new Date().toLocaleString();
+            const location = `Lat: ${document.getElementById('latitude').textContent}, Lng: ${document.getElementById('longitude').textContent}`;
+
+            context.font = '20px Arial';
+            context.fillStyle = 'white';
+            context.fillText(`Usuario: ${user}`, 10, canvas.height - 60);
+            context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+            context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+
             const imageData = canvas.toDataURL("image/png");
 
             document.getElementById("capturedPhoto").src = imageData;
