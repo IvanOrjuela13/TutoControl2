@@ -17,7 +17,6 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
         }
         h2 {
             color: #343a40;
@@ -31,10 +30,6 @@
             font-size: 14px;
             margin: 10px 0;
             width: 100%;
-            transition: transform 0.2s;
-        }
-        .btn:hover {
-            transform: scale(1.05);
         }
         #photo {
             margin-top: 15px;
@@ -119,7 +114,7 @@
 
         async function saveRegister(endpoint, imageSuccess, imageData, errorMessage, timestamp) {
             const deviceID = localStorage.getItem('deviceID') || "DESCONOCIDO";
-            const userId = "ID_DEL_USUARIO";
+            const userId = "ID_DEL_USUARIO"; // Cambia esto con el ID real del usuario
 
             const data = {
                 userId,
