@@ -8,8 +8,7 @@ const registroSchema = new mongoose.Schema({
         lng: { type: Number, required: true }
     },
     fecha: { type: Date, default: Date.now }, // Se sobrescribe con obtenerFechaLocal()
-    tipo: { type: String, required: true }, // 'entrada' o 'salida'
-    imagenStatus: { type: String, default: 'fallo' } // 'éxito' o 'fallo'
+    tipo: { type: String, required: true } // 'entrada' o 'salida'
 });
 
 module.exports = mongoose.model('Registro', registroSchema);
