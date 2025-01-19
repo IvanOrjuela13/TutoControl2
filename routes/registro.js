@@ -49,33 +49,4 @@ router.post('/salida', async (req, res) => {
     }
 });
 
-// Ruta para consultar registros (entrada/salida) por tipo y fecha
-router.get('/consultar', async (req, res) => {
-    const { tipo, fecha } = req.query;
-
-    try {
-        // Si no se envía tipo o fecha, se devuelve un mensaje de error
-        if (!tipo || !fecha) {
-            return res.status(400).json({ msg: 'Tipo y fecha son necesarios para la consulta.' });
-        }
-
-        // Buscar registros por tipo (entrada/salida) y fecha
-        const registros = await Registro.find({
-            tipo,
-            fecha: { $regex: `^${fecha}` } // Filtro por fecha específica (inicio de la fecha)
-        }).populate('userId', 'nombre'); // Opcional: mostrar nombre del usuario
-
-        // Si no se encuentran registros
-        if (registros.length === 0) {
-            return res.json({ success: false, message: 'No se encontraron registros.' });
-        }
-
-        // Responder con los registros encontrados
-        res.json({ success: true, registros });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error al consultar los registros.' });
-    }
-});
-
-module.exports = router;
+module.exports = router; 
