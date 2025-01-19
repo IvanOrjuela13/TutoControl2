@@ -96,29 +96,6 @@
         </div>
 
         <div id="message" class="mt-3"></div>
-
-        <!-- Nuevo formulario de búsqueda -->
-        <div class="mt-4">
-            <h4 class="text-center">Buscar Registros</h4>
-            <form id="searchForm" class="text-center">
-                <div class="form-group">
-                    <label for="entryExitSelect">Entrada o Salida</label>
-                    <select id="entryExitSelect" class="form-control">
-                        <option value="entrada">Entrada</option>
-                        <option value="salida">Salida</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="dateInput">Fecha (YYYY-MM-DD)</label>
-                    <input type="date" id="dateInput" class="form-control" />
-                </div>
-                <button type="button" id="searchBtn" class="btn btn-primary">Buscar Registros</button>
-            </form>
-
-            <div id="searchResults" class="mt-3">
-                <!-- Resultados de búsqueda se mostrarán aquí -->
-            </div>
-        </div>
     </div>
 
     <script>
@@ -231,36 +208,6 @@
         document.getElementById('logoutBtn').addEventListener('click', () => {
             document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
             setTimeout(() => { window.location.href = '/login.html'; }, 1000);
-        });
-
-        document.getElementById('searchBtn').addEventListener('click', async () => {
-            const entryExit = document.getElementById('entryExitSelect').value;
-            const date = document.getElementById('dateInput').value;
-            
-            if (!date) {
-                document.getElementById('searchResults').innerHTML = '<div class="alert alert-warning">Por favor, ingresa una fecha.</div>';
-                return;
-            }
-            
-            // Aquí puedes agregar la lógica para buscar los registros en tu base de datos, por ejemplo:
-            const response = await fetch(`/api/registro/${entryExit}?date=${date}`);
-            const data = await response.json();
-
-            if (data.length === 0) {
-                document.getElementById('searchResults').innerHTML = '<div class="alert alert-info">No se encontraron registros.</div>';
-            } else {
-                let resultsHTML = '<ul class="list-group">';
-                data.forEach(record => {
-                    resultsHTML += `
-                        <li class="list-group-item">
-                            <strong>${record.userName}</strong> - ${record.timestamp}<br>
-                            <em>Ubicación: Lat: ${record.lat}, Lng: ${record.lng}</em>
-                        </li>
-                    `;
-                });
-                resultsHTML += '</ul>';
-                document.getElementById('searchResults').innerHTML = resultsHTML;
-            }
         });
 
         getLocation().then(showPosition).catch(error => {
