@@ -17,84 +17,55 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
-        }
-        .container:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         h2 {
-            color: #343a40;
-            margin-bottom: 20px;
-            font-size: 24px;
             text-align: center;
         }
         .btn {
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 14px;
-            margin: 10px 0;
             width: 100%;
-            transition: transform 0.2s;
-        }
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        #locationDisplay, #resultsSection {
-            margin-top: 15px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #e9ecef;
-            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        #locationDisplay h5, #resultsSection h5 {
-            color: #343a40;
-            font-size: 18px;
             margin-bottom: 10px;
         }
-        #photo img {
-            border-radius: 10px;
-            max-width: 48%;
-            height: auto;
+        video, canvas {
+            display: block;
+            margin: auto;
         }
-        table {
-            width: 100%;
-            margin-top: 15px;
+        #photo img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">Dashboard <i class="fas fa-tachometer-alt"></i></h2>
-        
-        <!-- Opciones principales -->
-        <div class="text-center">
-            <button id="entradaBtn" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Registro de Entrada</button>
-            <button id="salidaBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Registro de Salida</button>
-            <button id="logoutBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
+        <h2>Dashboard</h2>
+        <!-- Botones principales -->
+        <button id="entradaBtn" class="btn btn-success">Registrar Entrada</button>
+        <button id="salidaBtn" class="btn btn-danger">Registrar Salida</button>
+        <button id="logoutBtn" class="btn btn-warning">Cerrar Sesión</button>
+
+        <!-- Cámara y foto -->
+        <div id="cameraSection" class="mt-4">
+            <h5>Foto Capturada:</h5>
+            <video id="video" width="320" height="240" autoplay></video>
+            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+            <div id="photo" class="mt-2"></div>
         </div>
 
-        <!-- Formulario de búsqueda -->
-        <div id="searchSection" class="mt-4">
+        <!-- Buscar registros -->
+        <div class="mt-4">
             <h5>Buscar Registros:</h5>
             <form id="searchForm" class="form-inline">
-                <div class="form-group mx-sm-3">
-                    <label for="searchDate" class="sr-only">Fecha</label>
-                    <input type="date" id="searchDate" class="form-control" required>
-                </div>
-                <div class="form-group mx-sm-3">
-                    <label for="searchType" class="sr-only">Tipo</label>
-                    <select id="searchType" class="form-control" required>
-                        <option value="entrada">Entrada</option>
-                        <option value="salida">Salida</option>
-                    </select>
-                </div>
+                <input type="date" id="searchDate" class="form-control mr-2" required>
+                <select id="searchType" class="form-control mr-2" required>
+                    <option value="entrada">Entrada</option>
+                    <option value="salida">Salida</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Buscar</button>
             </form>
         </div>
 
-        <!-- Resultados de búsqueda -->
+        <!-- Resultados -->
         <div id="resultsSection" class="mt-4" style="display: none;">
             <h5>Resultados de la búsqueda:</h5>
             <table class="table table-bordered table-striped">
@@ -112,31 +83,71 @@
     </div>
 
     <script>
-        async function fetchRegistros(date, type) {
-            const response = await fetch(`/api/registro/buscar?date=${date}&type=${type}`);
-            const data = await response.json();
-            return data.registros;
+        // Variables de la cámara
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photoDiv = document.getElementById('photo');
+
+        // Acceso a la cámara
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch((err) => {
+                console.error('Error al acceder a la cámara:', err);
+            });
+
+        // Registrar entrada o salida
+        async function registrar(tipo) {
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const foto = canvas.toDataURL('image/png');
+
+            const response = await fetch('/api/registro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tipo,
+                    foto,
+                }),
+            });
+
+            if (response.ok) {
+                alert(`${tipo.charAt(0).toUpperCase() + tipo.slice(1)} registrada con éxito.`);
+            } else {
+                alert('Error al registrar. Intenta nuevamente.');
+            }
         }
 
+        document.getElementById('entradaBtn').addEventListener('click', () => registrar('entrada'));
+        document.getElementById('salidaBtn').addEventListener('click', () => registrar('salida'));
+
+        // Buscar registros
         document.getElementById('searchForm').addEventListener('submit', async (event) => {
             event.preventDefault();
+
             const date = document.getElementById('searchDate').value;
             const type = document.getElementById('searchType').value;
 
-            const registros = await fetchRegistros(date, type);
+            const response = await fetch(`/api/registro/buscar?date=${date}&type=${type}`);
+            const data = await response.json();
+
             const tableBody = document.getElementById('resultsTableBody');
             tableBody.innerHTML = '';
 
-            if (registros.length === 0) {
+            if (data.registros.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="4">No se encontraron registros.</td></tr>';
             } else {
-                registros.forEach(registro => {
-                    const row = `<tr>
-                        <td>${registro.usuario}</td>
-                        <td>${new Date(registro.fecha).toLocaleString()}</td>
-                        <td>${registro.tipo}</td>
-                        <td>Lat: ${registro.ubicacion.lat}, Lng: ${registro.ubicacion.lng}</td>
-                    </tr>`;
+                data.registros.forEach(registro => {
+                    const row = `
+                        <tr>
+                            <td>${registro.usuario}</td>
+                            <td>${new Date(registro.fecha).toLocaleString()}</td>
+                            <td>${registro.tipo}</td>
+                            <td>Lat: ${registro.ubicacion.lat}, Lng: ${registro.ubicacion.lng}</td>
+                        </tr>`;
                     tableBody.innerHTML += row;
                 });
             }
