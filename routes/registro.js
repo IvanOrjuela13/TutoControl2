@@ -1,52 +1,26 @@
 const express = require('express');
-const Registro = require('../models/registro');
-const moment = require('moment-timezone');
 const router = express.Router();
+const Registro = require('../models/registro'); // Modelo de la base de datos
 
-// Ruta para registrar entrada
-router.post('/entrada', async (req, res) => {
-    const { userId, deviceID, ubicacion } = req.body;
+// Ruta para buscar registros por fecha y tipo
+router.get('/buscar', async (req, res) => {
+    const { date, type } = req.query;
 
     try {
-        // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
-        let fechaLocal = moment.tz("America/Bogota").subtract(5, 'hours');
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(endDate.getDate() + 1);
 
-        const nuevoRegistro = new Registro({
-            userId,
-            deviceID,
-            ubicacion,
-            fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
-            tipo: 'entrada'
+        const registros = await Registro.find({
+            tipo: type,
+            fecha: { $gte: startDate, $lt: endDate },
         });
-        await nuevoRegistro.save();
-        res.status(201).json({ msg: 'Entrada registrada exitosamente' });
+
+        res.json({ registros });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ msg: 'Error al registrar la entrada' });
+        res.status(500).json({ error: 'Error al buscar registros.' });
     }
 });
 
-// Ruta para registrar salida
-router.post('/salida', async (req, res) => {
-    const { userId, deviceID, ubicacion } = req.body;
-
-    try {
-        // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
-        let fechaLocal = moment.tz("America/Bogota").subtract(5, 'hours');
-
-        const nuevoRegistro = new Registro({
-            userId,
-            deviceID,
-            ubicacion,
-            fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
-            tipo: 'salida'
-        });
-        await nuevoRegistro.save();
-        res.status(201).json({ msg: 'Salida registrada exitosamente' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: 'Error al registrar la salida' });
-    }
-});
-
-module.exports = router; 
+module.exports = router;
