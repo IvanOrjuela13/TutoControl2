@@ -1,28 +1,52 @@
 const express = require('express');
-const router = express.Router();
 const Registro = require('../models/registro');
+const moment = require('moment-timezone');
+const router = express.Router();
 
-// Guardar registro con foto
-router.post('/', async (req, res) => {
-    const { tipo, foto } = req.body;
-
-    if (!tipo || !foto) {
-        return res.status(400).json({ error: 'Tipo y foto son obligatorios' });
-    }
+// Ruta para registrar entrada
+router.post('/entrada', async (req, res) => {
+    const { userId, deviceID, ubicacion } = req.body;
 
     try {
-        const registro = new Registro({
-            usuario: req.user.username, // Usuario autenticado
-            tipo,
-            fecha: new Date(),
-            ubicacion: { lat: req.body.lat, lng: req.body.lng },
-            foto,
-        });
+        // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
+        let fechaLocal = moment.tz("America/Bogota").subtract(5, 'hours');
 
-        await registro.save();
-        res.json({ message: 'Registro guardado con éxito' });
+        const nuevoRegistro = new Registro({
+            userId,
+            deviceID,
+            ubicacion,
+            fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
+            tipo: 'entrada'
+        });
+        await nuevoRegistro.save();
+        res.status(201).json({ msg: 'Entrada registrada exitosamente' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error al guardar el registro' });
+        res.status(500).json({ msg: 'Error al registrar la entrada' });
     }
 });
+
+// Ruta para registrar salida
+router.post('/salida', async (req, res) => {
+    const { userId, deviceID, ubicacion } = req.body;
+
+    try {
+        // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
+        let fechaLocal = moment.tz("America/Bogota").subtract(5, 'hours');
+
+        const nuevoRegistro = new Registro({
+            userId,
+            deviceID,
+            ubicacion,
+            fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
+            tipo: 'salida'
+        });
+        await nuevoRegistro.save();
+        res.status(201).json({ msg: 'Salida registrada exitosamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error al registrar la salida' });
+    }
+});
+
+module.exports = router; 
