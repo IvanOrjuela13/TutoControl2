@@ -1,26 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const Registro = require('../models/registro'); // Modelo de la base de datos
+const Registro = require('../models/registro');
 
-// Ruta para buscar registros por fecha y tipo
-router.get('/buscar', async (req, res) => {
-    const { date, type } = req.query;
+// Guardar registro con foto
+router.post('/', async (req, res) => {
+    const { tipo, foto } = req.body;
+
+    if (!tipo || !foto) {
+        return res.status(400).json({ error: 'Tipo y foto son obligatorios' });
+    }
 
     try {
-        const startDate = new Date(date);
-        const endDate = new Date(date);
-        endDate.setDate(endDate.getDate() + 1);
-
-        const registros = await Registro.find({
-            tipo: type,
-            fecha: { $gte: startDate, $lt: endDate },
+        const registro = new Registro({
+            usuario: req.user.username, // Usuario autenticado
+            tipo,
+            fecha: new Date(),
+            ubicacion: { lat: req.body.lat, lng: req.body.lng },
+            foto,
         });
 
-        res.json({ registros });
+        await registro.save();
+        res.json({ message: 'Registro guardado con éxito' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error al buscar registros.' });
+        res.status(500).json({ error: 'Error al guardar el registro' });
     }
 });
-
-module.exports = router;
