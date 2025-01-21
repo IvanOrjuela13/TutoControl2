@@ -206,7 +206,13 @@
         document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
+            // Mostrar el mensaje de cierre de sesión
             document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            
+            // Redirigir a la página de login
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000); // La redirección ocurrirá después de 1 segundo (1000 ms) para dar tiempo al mensaje
         });
     </script>
 </body>
