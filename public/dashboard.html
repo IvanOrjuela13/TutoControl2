@@ -73,6 +73,9 @@
             max-width: 48%; /* Ajustamos el tamaño de la imagen */
             height: auto;
         }
+        #registros {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +99,12 @@
         </div>
 
         <div id="message" class="mt-3"></div>
+
+        <!-- Sección para mostrar registros -->
+        <div id="registros" class="mt-3">
+            <h5>Registros de Entrada y Salida:</h5>
+            <div id="registrosList"></div>
+        </div>
     </div>
 
     <script>
@@ -202,17 +211,42 @@
             }
         }
 
+        // Función para buscar registros
+        async function fetchRegistros() {
+            try {
+                const response = await fetch('/api/registro/listar'); // Cambia la ruta si es necesario
+                const data = await response.json();
+
+                if (data.success) {
+                    let registrosHTML = '<ul class="list-group">';
+                    data.registros.forEach(registro => {
+                        registrosHTML += `
+                            <li class="list-group-item">
+                                <strong>Usuario:</strong> ${registro.usuario} 
+                                <strong>Fecha:</strong> ${registro.fecha} 
+                                <strong>Ubicación:</strong> Lat: ${registro.ubicacion.lat}, Lng: ${registro.ubicacion.lng}
+                            </li>
+                        `;
+                    });
+                    registrosHTML += '</ul>';
+                    document.getElementById('registrosList').innerHTML = registrosHTML;
+                } else {
+                    document.getElementById('registrosList').innerHTML = '<div class="alert alert-danger">No se encontraron registros.</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching registros:', error);
+                document.getElementById('registrosList').innerHTML = '<div class="alert alert-danger">Error al cargar los registros.</div>';
+            }
+        }
+
+        // Llamamos a la función al cargar la página
+        fetchRegistros();
+
         document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
         document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
-            setTimeout(() => { window.location.href = '/login.html'; }, 1000);
-        });
-
-        getLocation().then(showPosition).catch(error => {
-            console.error(error);
-            alert('Error al obtener la ubicación.');
         });
     </script>
 </body>
