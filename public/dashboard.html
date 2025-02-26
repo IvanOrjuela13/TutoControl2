@@ -161,8 +161,8 @@
     context.drawImage(videoElement, 0, 0);
 
     // Obtener datos reales del usuario
-    const userName = localStorage.getItem('userName') || 'Usuario Desconocido';
-    const userID = localStorage.getItem('userID') || 'ID Desconocido';
+    const username = localStorage.getItem('username') || 'Usuario Desconocido';
+    const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
 
     // Obtener fecha, hora y ubicación actual
     const dateTime = new Date().toLocaleString();
@@ -173,8 +173,8 @@
     // Agregar texto sobre la imagen con los datos reales del usuario
     context.font = '20px Arial';
     context.fillStyle = 'white';
-    context.fillText(`Usuario: ${userName}`, 10, canvas.height - 80);
-    context.fillText(`ID: ${userID}`, 10, canvas.height - 60);
+    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
     context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
     context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
 
