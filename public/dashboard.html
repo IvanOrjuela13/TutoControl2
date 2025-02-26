@@ -108,7 +108,9 @@
 
         const videoElement = document.createElement("video");
 
-
+// Suponiendo que estas variables contienen los valores del usuario autenticado
+        const userName = 'Ivan'; // Reemplaza con la variable que contiene el nombre del usuario
+        const userID = '678d2aee2ec1cbd8499dc892'; // Reemplaza con la variable que contiene el ID del usuario
         async function getLocation() {
             if (navigator.geolocation) {
                 return new Promise((resolve, reject) => {
