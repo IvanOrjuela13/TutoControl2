@@ -146,7 +146,7 @@
             return distance <= maxDistance;
         }
 
-        async function capturePhoto() {
+         async function capturePhoto() {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
@@ -160,28 +160,44 @@
 
     context.drawImage(videoElement, 0, 0);
 
-    // Obtener datos reales del usuario
-    const username = localStorage.getItem('username') || 'Usuario Desconocido';
-    const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
+    try {
+        // Obtener datos reales del usuario desde la base de datos
+        const userResponse = await fetch('/api/user', { 
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
 
-    // Obtener fecha, hora y ubicación actual
-    const dateTime = new Date().toLocaleString();
-    const lat = document.getElementById('latitude').textContent;
-    const lng = document.getElementById('longitude').textContent;
-    const location = `Lat: ${lat}, Lng: ${lng}`;
+        if (!userResponse.ok) throw new Error("Error al obtener datos del usuario");
 
-    // Agregar texto sobre la imagen con los datos reales del usuario
-    context.font = '20px Arial';
-    context.fillStyle = 'white';
-    context.fillText(`users: ${username}`, 10, canvas.height - 80);
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+        const userData = await userResponse.json();
+        const username = userData.name || 'Usuario Desconocido';
+        const userID = userData._id || 'ID Desconocido';
 
-    const imageData = canvas.toDataURL("image/png");
+        // Obtener fecha, hora y ubicación actual
+        const dateTime = new Date().toLocaleString();
+        const lat = document.getElementById('latitude').textContent;
+        const lng = document.getElementById('longitude').textContent;
+        const location = `Lat: ${lat}, Lng: ${lng}`;
 
-    document.getElementById("capturedPhoto").src = imageData;
-    stream.getTracks().forEach(track => track.stop());
+        // Agregar texto sobre la imagen con los datos reales del usuario
+        context.font = '20px Arial';
+        context.fillStyle = 'white';
+        context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+        context.fillText(`ID: ${userID}`, 10, canvas.height - 60);
+        context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+        context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+
+        const imageData = canvas.toDataURL("image/png");
+
+        document.getElementById("capturedPhoto").src = imageData;
+        stream.getTracks().forEach(track => track.stop());
+
+    } catch (error) {
+        console.error("Error al obtener datos del usuario:", error);
+        document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        stream.getTracks().forEach(track => track.stop());
+    }
+
      
         }
 
