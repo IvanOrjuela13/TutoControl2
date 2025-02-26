@@ -146,7 +146,18 @@
             return distance <= maxDistance;
         }
 
-         async function capturePhoto() {
+         async function getUsernameFromDB() {
+    try {
+        const response = await fetch('/api/auth/user'); // Asegúrate de que esta ruta devuelva el username
+        const data = await response.json();
+        return data.username || 'Usuario Desconocido';
+    } catch (error) {
+        console.error('Error obteniendo username:', error);
+        return 'Usuario Desconocido';
+    }
+}
+
+async function capturePhoto() {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
@@ -160,8 +171,8 @@
 
     context.drawImage(videoElement, 0, 0);
 
-    // Obtener datos reales del usuario
-    const username = localStorage.getItem('username') || 'Usuario Desconocido';
+    // Obtener username desde la base de datos
+    const username = await getUsernameFromDB();
     const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
 
     // Obtener fecha, hora y ubicación actual
@@ -182,7 +193,7 @@
 
     document.getElementById("capturedPhoto").src = imageData;
     stream.getTracks().forEach(track => track.stop());
-      
+
 
      }
         
