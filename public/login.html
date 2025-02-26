@@ -71,15 +71,20 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, deviceID }), // Envía el deviceID
+                    body: JSON.stringify({ username, password, deviceID }), // Enviamos el deviceID
                 });
 
                 const data = await response.json();
 
                 const messageDiv = document.getElementById('message');
                 if (response.ok) {
+                    // Guardar username y token en localStorage
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('token', data.token);
+
+                    console.log("Usuario almacenado en localStorage:", username); // Verificar en consola
+
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    localStorage.setItem('token', data.token); // Guarda el token en localStorage
                     window.location.href = 'dashboard.html'; // Redirige al dashboard
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
