@@ -146,18 +146,7 @@
             return distance <= maxDistance;
         }
 
-         async function getusernameFromDB() {
-    try {
-        const response = await fetch('/api/auth/users'); // Asegúrate de que esta ruta devuelva el username
-        const data = await response.json();
-        return data.username || 'Usuario Desconocido';
-    } catch (error) {
-        console.error('Error obteniendo username:', error);
-        return 'Usuario Desconocido';
-    }
-}
-
-async function capturePhoto() {
+         async function capturePhoto() {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
@@ -171,8 +160,8 @@ async function capturePhoto() {
 
     context.drawImage(videoElement, 0, 0);
 
-    // Obtener username desde la base de datos
-    const username = await getusernameFromDB();
+    // Obtener username desde localStorage
+    const username = localStorage.getItem('username') || 'Usuario Desconocido';
     const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
 
     // Obtener fecha, hora y ubicación actual
@@ -184,7 +173,7 @@ async function capturePhoto() {
     // Agregar texto sobre la imagen con los datos reales del usuario
     context.font = '20px Arial';
     context.fillStyle = 'white';
-    context.fillText(`users: ${username}`, 10, canvas.height - 80);
+    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
     context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
     context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
     context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
@@ -193,8 +182,6 @@ async function capturePhoto() {
 
     document.getElementById("capturedPhoto").src = imageData;
     stream.getTracks().forEach(track => track.stop());
-
-
      }
         
 
