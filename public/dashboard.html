@@ -146,7 +146,7 @@
             return distance <= maxDistance;
         }
 
-         async function getUsernameFromDB() {
+         async function getusernameFromDB() {
     try {
         const response = await fetch('/api/auth/user'); // Asegúrate de que esta ruta devuelva el username
         const data = await response.json();
@@ -172,7 +172,7 @@ async function capturePhoto() {
     context.drawImage(videoElement, 0, 0);
 
     // Obtener username desde la base de datos
-    const username = await getUsernameFromDB();
+    const username = await getusernameFromDB();
     const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
 
     // Obtener fecha, hora y ubicación actual
