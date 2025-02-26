@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -71,7 +70,7 @@
         }
         #photo img {
             border-radius: 10px;
-            max-width: 48%; /* Ajustamos el tamaño de la imagen */
+            max-width: 48%;
             height: auto;
         }
     </style>
@@ -100,17 +99,26 @@
     </div>
 
     <script>
+        // Verificar si el usuario está autenticado
+        document.addEventListener("DOMContentLoaded", function () {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                window.location.href = "login.html";
+            }
+        });
+
         const referenceLocation = {
             lat: 4.368173,
             lng: -75.136478 ,
         };
-        const maxDistance = 5000; // Distancia máxima en metros
+        const maxDistance = 5000;
 
         const videoElement = document.createElement("video");
 
-// Suponiendo que estas variables contienen los valores del usuario autenticado
-        const userName = 'Ivan'; // Reemplaza con la variable que contiene el nombre del usuario
-        const userID = '678d2aee2ec1cbd8499dc892'; // Reemplaza con la variable que contiene el ID del usuario
+        const userName = 'Ivan';
+        const userID = '678d2aee2ec1cbd8499dc892';
+
         async function getLocation() {
             if (navigator.geolocation) {
                 return new Promise((resolve, reject) => {
@@ -129,7 +137,7 @@
                       Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const distance = R * c * 1000; // Convertir a metros
+            const distance = R * c * 1000;
             return distance;
         }
 
@@ -145,45 +153,6 @@
             return distance <= maxDistance;
         }
 
-         async function capturePhoto() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoElement.srcObject = stream;
-    videoElement.play();
-
-    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-
-    context.drawImage(videoElement, 0, 0);
-
-    // Obtener username desde localStorage
-    const username = localStorage.getItem('username') || 'Usuario Desconocido';
-    const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
-
-    // Obtener fecha, hora y ubicación actual
-    const dateTime = new Date().toLocaleString();
-    const lat = document.getElementById('latitude').textContent;
-    const lng = document.getElementById('longitude').textContent;
-    const location = `Lat: ${lat}, Lng: ${lng}`;
-
-    // Agregar texto sobre la imagen con los datos reales del usuario
-    context.font = '20px Arial';
-    context.fillStyle = 'white';
-    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
-
-    const imageData = canvas.toDataURL("image/png");
-
-    document.getElementById("capturedPhoto").src = imageData;
-    stream.getTracks().forEach(track => track.stop());
-     }
-        
-
         async function handleRegister(endpoint) {
             try {
                 const position = await getLocation();
@@ -194,9 +163,7 @@
                     return;
                 }
 
-                await capturePhoto();
-
-                const userId = userID; // Utilizamos el ID del usuario
+                const userId = userID;
                 const deviceID = localStorage.getItem('deviceID');
                 const response = await fetch(endpoint, {
                     method: 'POST',
@@ -214,13 +181,11 @@
         document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            // Mostrar el mensaje de cierre de sesión
             document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
-            
-            // Redirigir a la página de login
             setTimeout(() => {
+                localStorage.removeItem("token");
                 window.location.href = 'login.html';
-            }, 1000); // La redirección ocurrirá después de 1 segundo (1000 ms) para dar tiempo al mensaje
+            }, 1000);
         });
     </script>
 </body>
