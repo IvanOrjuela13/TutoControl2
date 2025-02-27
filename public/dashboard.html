@@ -202,65 +202,44 @@
         }
     
     async function capturePhoto() {
-    try {
-        // Obtener datos del usuario desde la base de datos
-        const response = await fetch("/api/user-info", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`, // Asegúrate de enviar el token de autenticación
-                "Content-Type": "application/json"
-            }
-        });
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoElement.srcObject = stream;
+    videoElement.play();
 
-        if (!response.ok) {
-            throw new Error("No se pudo obtener la información del usuario");
-        }
+    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
 
-        const userData = await response.json();
+    context.drawImage(videoElement, 0, 0);
 
-        // Datos del usuario obtenidos desde la base de datos
-        const fullName = userData.fullName || "Nombre No Disponible";
-        const cedula = userData.cedula || "Cédula No Disponible";
-        const username = userData.username || "Usuario Desconocido";
-        const deviceID = userData.deviceID || "ID Desconocido";
+    // Obtener datos desde localStorage
+    const username = localStorage.getItem('username') || 'Usuario Desconocido';
+    const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
+    const fullName = localStorage.getItem('fullName') || 'Nombre No Disponible';
+    const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
 
-        // Capturar la imagen
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoElement.srcObject = stream;
-        videoElement.play();
+    // Obtener fecha, hora y ubicación actual
+    const dateTime = new Date().toLocaleString();
+    const lat = document.getElementById('latitude').textContent;
+    const lng = document.getElementById('longitude').textContent;
+    const location = `Lat: ${lat}, Lng: ${lng}`;
 
-        await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
+    // Agregar texto sobre la imagen con los datos del usuario
+    context.font = '20px Arial';
+    context.fillStyle = 'white';
+    context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
+    context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
+    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
+    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
 
-        context.drawImage(videoElement, 0, 0);
+    const imageData = canvas.toDataURL("image/png");
 
-        // Obtener fecha, hora y ubicación actual
-        const dateTime = new Date().toLocaleString();
-        const lat = document.getElementById('latitude').textContent;
-        const lng = document.getElementById('longitude').textContent;
-        const location = `Lat: ${lat}, Lng: ${lng}`;
-
-        // Agregar texto sobre la imagen con los datos del usuario
-        context.font = "20px Arial";
-        context.fillStyle = "white";
-        context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
-        context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
-        context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
-        context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-        context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-        context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
-
-        const imageData = canvas.toDataURL("image/png");
-
-        document.getElementById("capturedPhoto").src = imageData;
-        stream.getTracks().forEach(track => track.stop());
-    } catch (error) {
-        console.error("Error al capturar la foto:", error);
-        alert("No se pudo capturar la foto. Inténtalo de nuevo.");
-    }
+    document.getElementById("capturedPhoto").src = imageData;
+    stream.getTracks().forEach(track => track.stop());
 }
 
         async function handleRegister(endpoint) {
