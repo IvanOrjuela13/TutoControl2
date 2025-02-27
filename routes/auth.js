@@ -1,37 +1,57 @@
 const express = require('express');
-const User = require('../models/User'); 
-const jwt = require('jsonwebtoken'); 
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
+
+// Ruta para restablecer la contraseña
+router.post('/reset-password', async (req, res) => {
+    const { username, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
+
+        // Actualiza la contraseña del usuario
+        user.password = newPassword; 
+        await user.save();
+
+        res.json({ msg: 'Contraseña actualizada exitosamente' });
+
+    } catch (error) {
+        console.error("Error al actualizar la contraseña:", error.message);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+});
+
+// Otras rutas se mantienen igual...
 
 // Ruta para el registro de usuarios
 router.post('/register', async (req, res) => {
-    const { fullName, cedula, area, username, password, deviceID } = req.body; 
+    const { fullName, cedula, area, username, password, deviceID } = req.body;
 
     try {
-        // Verificar que todos los campos obligatorios están presentes
         if (!fullName || !cedula || !area || !username || !password || !deviceID) {
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
         }
 
-        // Verificar si el usuario ya existe
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(400).json({ msg: 'El nombre de usuario ya está en uso' });
         }
 
-        // Verificar si la cédula ya está registrada
         const existingCedula = await User.findOne({ cedula });
         if (existingCedula) {
             return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
         }
 
-        // Verificar si el dispositivo ya tiene un usuario registrado
         const existingDevice = await User.findOne({ deviceID });
         if (existingDevice) {
             return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
         }
 
-        // Crear nuevo usuario
         const newUser = new User({
             fullName,
             cedula,
@@ -52,7 +72,7 @@ router.post('/register', async (req, res) => {
 
 // Ruta para el inicio de sesión
 router.post('/login', async (req, res) => {
-    const { username, password, deviceID } = req.body; 
+    const { username, password, deviceID } = req.body;
 
     try {
         let user = await User.findOne({ username });
@@ -66,7 +86,6 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Contraseña incorrecta' });
         }
 
-        // Verifica si el deviceID coincide
         if (user.deviceID !== deviceID) {
             return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
         }
