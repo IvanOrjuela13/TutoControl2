@@ -151,8 +151,7 @@
 
         <div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-    <img id="capturedPhoto" src="#" alt="Foto no disponible" />
-            <p id="photoPlaceholder">📷 No hay foto aún</p>
+    <img id="capturedPhoto" alt="Foto no disponible" />
 </div>
 
         <div id="message" class="mt-3"></div>
@@ -271,10 +270,6 @@
 
         document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
         document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
-        document.getElementById("capturedPhoto").src = imageData;
-document.getElementById("photoPlaceholder").style.display = "none";
-
-
         document.getElementById('logoutBtn').addEventListener('click', () => {
             // Mostrar el mensaje de cierre de sesión
             document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
