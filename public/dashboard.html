@@ -154,9 +154,23 @@
         <span id="capturedPhoto" class="text-center" style="font-size: 50px; color: #888;">📷</span>
     </div>
 </div>
+<script>
+        const photoContainer = document.getElementById('capturedPhotoContainer');
+const capturedPhoto = document.getElementById('capturedPhoto');
 
+// Simulando una captura de foto (en realidad esto lo harías con la cámara)
+let imageSrc = ''; // O la URL de la foto capturada, si es válida
+
+if (imageSrc) {
+    // Si hay una imagen válida, mostrarla
+    photoContainer.innerHTML = `<img src="${imageSrc}" alt="Foto capturada" class="img-fluid" style="border-radius: 10px;"/>`;
+} else {
+    // Si no hay imagen, mostrar el emoticón
+    capturedPhoto.style.display = 'block'; // Muestra el emoticón
+    photoContainer.style.backgroundColor = '#f0f0f0'; // Color de fondo si no hay imagen
+}
         
-
+</script>
 <script>
     function mostrarError() {
         document.getElementById("errorMsg").style.display = "block";
