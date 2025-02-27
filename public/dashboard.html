@@ -206,6 +206,12 @@
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
+             
+function mostrarFoto(url) {
+    let img = document.getElementById("capturedPhoto");
+    img.src = url;
+    img.style.display = "block"; // Muestra la imagen cuando tenga una foto
+}
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     videoElement.srcObject = stream;
     videoElement.play();
@@ -215,12 +221,6 @@
     canvas.height = videoElement.videoHeight;
 
     context.drawImage(videoElement, 0, 0);
-             
-function mostrarFoto(url) {
-    let img = document.getElementById("capturedPhoto");
-    img.src = url;
-    img.style.display = "block"; // Muestra la imagen cuando tenga una foto
-}
 
     // Obtener username desde localStorage
     const username = localStorage.getItem('username') || 'Usuario Desconocido';
