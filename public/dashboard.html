@@ -259,5 +259,41 @@
             }, 1000); // La redirección ocurrirá después de 1 segundo (1000 ms) para dar tiempo al mensaje
         });
     </script>
+    <script>
+    async function verificarAcceso() {
+        const deviceID = localStorage.getItem('deviceID');
+
+        if (!deviceID) {
+            bloquearAcceso();
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/verificar-dispositivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deviceID })
+            });
+
+            const data = await response.json();
+
+            if (!data.autorizado) {
+                bloquearAcceso();
+            }
+        } catch (error) {
+            bloquearAcceso();
+        }
+    }
+
+    function bloquearAcceso() {
+        document.body.innerHTML = "<h3 style='text-align:center; margin-top:20%; color:red;'>Prohibido el ingreso</h3>";
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 60000);
+    }
+
+    verificarAcceso();
+</script>
+
 </body>
 </html>
