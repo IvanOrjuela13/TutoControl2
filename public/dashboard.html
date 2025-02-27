@@ -222,21 +222,23 @@
     const lat = document.getElementById('latitude').textContent;
     const lng = document.getElementById('longitude').textContent;
     const location = `Lat: ${lat}, Lng: ${lng}`;
+// Agregar texto sobre la imagen con los datos reales del usuario
+context.font = '20px Arial';
+context.fillStyle = 'white';
 
-    // Agregar texto sobre la imagen con los datos reales del usuario
-    context.font = '20px Arial';
-    context.fillStyle = 'white';
-    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+// Posicionar los textos en la imagen
+context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
+context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
+context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
+context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
 
-    const imageData = canvas.toDataURL("image/png");
+const imageData = canvas.toDataURL("image/png");
 
-    document.getElementById("capturedPhoto").src = imageData;
-    stream.getTracks().forEach(track => track.stop());
-     }
-        
+document.getElementById("capturedPhoto").src = imageData;
+stream.getTracks().forEach(track => track.stop());
+
 
         async function handleRegister(endpoint) {
             try {
