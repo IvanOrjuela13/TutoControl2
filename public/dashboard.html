@@ -148,29 +148,11 @@
     <p id="timestamp" style="font-size: 14px; color: #636e72;">📅 Fecha y Hora: <span id="dateTime">-</span></p>
 </div>
         
-        <div id="photo">
+    <div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-    <div id="capturedPhotoContainer" class="d-flex justify-content-center align-items-center" style="width: 100%; height: 200px; background-color: #f0f0f0; border-radius: 10px;">
-        <span id="capturedPhoto" class="text-center" style="font-size: 50px; color: #888;">📷</span>
-    </div>
+            <img id="capturedPhoto"  src="#" alt="Foto no disponible" />
 </div>
-<script>
-        const photoContainer = document.getElementById('capturedPhotoContainer');
-const capturedPhoto = document.getElementById('capturedPhoto');
-
-// Simulando una captura de foto (en realidad esto lo harías con la cámara)
-let imageSrc = ''; // O la URL de la foto capturada, si es válida
-
-if (imageSrc) {
-    // Si hay una imagen válida, mostrarla
-    photoContainer.innerHTML = `<img src="${imageSrc}" alt="Foto capturada" class="img-fluid" style="border-radius: 10px;"/>`;
-} else {
-    // Si no hay imagen, mostrar el emoticón
-    capturedPhoto.style.display = 'block'; // Muestra el emoticón
-    photoContainer.style.backgroundColor = '#f0f0f0'; // Color de fondo si no hay imagen
-}
         
-</script>
 <script>
     function mostrarError() {
         document.getElementById("errorMsg").style.display = "block";
