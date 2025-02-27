@@ -222,6 +222,9 @@
                 window.location.href = 'login.html';
             }, 1000); // La redirección ocurrirá después de 1 segundo (1000 ms) para dar tiempo al mensaje
         });
+     // Obtener el nombre del usuario desde localStorage o usar un valor por defecto
+const username = localStorage.getItem('username') || 'Usuario';
+document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${username}! Listo para marcar tu registro con estilo. 🚀`;
     </script>
 </body>
 </html>
