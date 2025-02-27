@@ -5,26 +5,48 @@ const router = express.Router();
 
 // Ruta para el registro de usuarios
 router.post('/register', async (req, res) => {
-    const { username, password, deviceID } = req.body; 
+    const { fullName, cedula, area, username, password, deviceID } = req.body; 
 
     try {
-        // Verifica si ya existe un usuario con el mismo deviceID
-        const existingUser = await User.findOne({ deviceID });
+        // Verificar que todos los campos obligatorios están presentes
+        if (!fullName || !cedula || !area || !username || !password || !deviceID) {
+            return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+        }
+
+        // Verificar si el usuario ya existe
+        const existingUser = await User.findOne({ username });
         if (existingUser) {
+            return res.status(400).json({ msg: 'El nombre de usuario ya está en uso' });
+        }
+
+        // Verificar si la cédula ya está registrada
+        const existingCedula = await User.findOne({ cedula });
+        if (existingCedula) {
+            return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
+        }
+
+        // Verificar si el dispositivo ya tiene un usuario registrado
+        const existingDevice = await User.findOne({ deviceID });
+        if (existingDevice) {
             return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
         }
 
-        let user = new User({
+        // Crear nuevo usuario
+        const newUser = new User({
+            fullName,
+            cedula,
+            area,
             username,
             password,
-            deviceID 
+            deviceID
         });
 
-        await user.save();
+        await newUser.save();
         res.status(201).json({ msg: 'Usuario creado exitosamente' });
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ msg: 'Error al crear el usuario' });
+        console.error("Error al registrar usuario:", error);
+        res.status(500).json({ msg: 'Error en el servidor' });
     }
 });
 
@@ -52,10 +74,10 @@ router.post('/login', async (req, res) => {
         const payload = { userId: user._id };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Enviar el token y mensaje al cliente
         res.json({ token, msg: 'Inicio de sesión exitoso' });
+
     } catch (error) {
-        console.error(error.message);
+        console.error("Error en el servidor:", error.message);
         res.status(500).send('Error en el servidor');
     }
 });
@@ -71,8 +93,9 @@ router.get('/user/:username', async (req, res) => {
         }
 
         res.json({ deviceID: user.deviceID });
+
     } catch (error) {
-        console.error(error.message);
+        console.error("Error en el servidor:", error.message);
         res.status(500).send('Error en el servidor');
     }
 });
