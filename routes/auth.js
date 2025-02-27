@@ -1,4 +1,4 @@
-Este es mi routes/auth.js const express = require('express');
+const express = require('express');
 const User = require('../models/User'); 
 const jwt = require('jsonwebtoken'); 
 const router = express.Router();
