@@ -77,4 +77,11 @@ router.get('/user/:username', async (req, res) => {
     }
 });
 
+app.post('/api/verificar-dispositivo', async (req, res) => {
+    const { deviceID } = req.body;
+    const usuario = await User.findOne({ deviceID });
+
+    res.json({ autorizado: !!usuario });
+});
+
 module.exports = router;
