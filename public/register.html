@@ -12,17 +12,18 @@
         }
         .container {
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin-top: 100px;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 350px;
+            margin-top: 50px;
             border: 1px solid #dee2e6;
         }
         h2 {
-            font-family: 'Arial', sans-serif;
-            margin-bottom: 20px;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
             color: #4a4a4a;
+            text-align: center;
         }
         .btn-primary {
             background-color: #007bff;
@@ -33,14 +34,18 @@
             background-color: #0056b3;
         }
         .form-control {
-            border-radius: 20px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            padding: 5px;
         }
         small {
             color: #666;
+            font-size: 0.8rem;
         }
         .alert {
             opacity: 0.9;
             border-radius: 10px;
+            font-size: 0.85rem;
         }
         a {
             color: #007bff;
@@ -51,27 +56,39 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Registro de Tutores</h2>
+    <div class="container mt-4">
+        <h2>Registro de Tutores</h2>
         <form id="registerForm">
             <div class="form-group">
+                <label for="fullName">Nombre completo:</label>
+                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="cedula">Cédula:</label>
+                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required maxlength="15">
+            </div>
+            <div class="form-group">
+                <label for="area">Área:</label>
+                <input type="text" class="form-control" id="area" placeholder="Ingresa tu área" required maxlength="30">
+            </div>
+            <div class="form-group">
                 <label for="username">Nombre de usuario:</label>
-                <input type="text" class="form-control" id="username" placeholder="Ingresa tu nombre de usuario" required maxlength="20">
+                <input type="text" class="form-control" id="username" placeholder="Ingresa tu usuario" required maxlength="20">
             </div>
             <div class="form-group">
                 <label for="password">Contraseña:</label>
                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="18">
-                <small class="form-text text-muted">La contraseña debe tener al menos 10 caracteres, una letra mayúscula, una minúscula y un número.</small>
+                <small>Debe tener al menos 10 caracteres, una mayúscula, una minúscula y un número.</small>
             </div>
             <div class="form-group">
                 <label for="confirmPassword">Confirmar contraseña:</label>
-                <input type="password" class="form-control" id="confirmPassword" placeholder="Vuelve a ingresar tu contraseña" required maxlength="18">
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Repite tu contraseña" required maxlength="18">
             </div>
             <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
         </form>
 
         <div id="message" class="mt-3"></div>
-        <p class="mt-3 text-center">¿Ya tienes una cuenta? <a href="login.html">Iniciar sesión</a></p>
+        <p class="mt-3 text-center">¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a></p>
     </div>
 
     <script>
@@ -90,6 +107,9 @@
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const fullName = document.getElementById('fullName').value;
+            const cedula = document.getElementById('cedula').value;
+            const area = document.getElementById('area').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -111,7 +131,7 @@
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, deviceID }),
+                    body: JSON.stringify({ fullName, cedula, area, username, password, deviceID }),
                 });
 
                 const data = await response.json();
