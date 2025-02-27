@@ -222,25 +222,6 @@
                 window.location.href = 'login.html';
             }, 1000); // La redirección ocurrirá después de 1 segundo (1000 ms) para dar tiempo al mensaje
         });
-
-        // Obtener el nombre del usuario desde localStorage
-const userName = localStorage.getItem('username') || 'Usuario';
-
-// Frase personalizada de bienvenida
-const frases = [
-    `¡Bienvenido ${userName}, el éxito te espera!`,
-    `${userName}, hoy es un gran día para triunfar.`,
-    `¡Hola ${userName}! Tu esfuerzo marca la diferencia.`,
-    `${userName}, cada día es una nueva oportunidad.`,
-    `¡Saludos ${userName}! Estás donde debes estar.`
-];
-
-// Seleccionar una frase al azar
-const fraseElegida = frases[Math.floor(Math.random() * frases.length)];
-
-// Actualizar el título del Dashboard
-document.querySelector("h2").innerHTML = `${fraseElegida} <i class="fas fa-tachometer-alt"></i>`;
-
     </script>
 </body>
 </html>
