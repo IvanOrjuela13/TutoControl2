@@ -7,46 +7,46 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #e9ecef; /* Color de fondo suave */
+            background-color: #e9ecef;
             color: #333;
         }
         .container {
-            background: white; /* Fondo blanco para el contenedor */
-            border-radius: 15px; /* Bordes redondeados */
+            background: white;
+            border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-            max-width: 400px; /* Ancho máximo del contenedor */
-            margin-top: 100px; /* Espacio superior */
-            border: 1px solid #dee2e6; /* Borde suave */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin-top: 100px;
+            border: 1px solid #dee2e6;
         }
         h2 {
             font-family: 'Arial', sans-serif;
             margin-bottom: 20px;
-            color: #4a4a4a; /* Color del título más suave */
+            color: #4a4a4a;
         }
         .btn-primary {
-            background-color: #007bff; /* Color del botón */
-            border-radius: 20px; /* Bordes redondeados para el botón */
+            background-color: #007bff;
+            border-radius: 20px;
             border: none;
         }
         .btn-primary:hover {
-            background-color: #0056b3; /* Color al pasar el mouse */
+            background-color: #0056b3;
         }
         .form-control {
-            border-radius: 20px; /* Bordes redondeados para los inputs */
+            border-radius: 20px;
         }
         small {
-            color: #666; /* Color del texto pequeño */
+            color: #666;
         }
         .alert {
             opacity: 0.9;
-            border-radius: 10px; /* Bordes redondeados para las alertas */
+            border-radius: 10px;
         }
         a {
-            color: #007bff; /* Color del enlace */
+            color: #007bff;
         }
         a:hover {
-            color: #0056b3; /* Color del enlace al pasar el mouse */
+            color: #0056b3;
         }
     </style>
 </head>
@@ -63,6 +63,10 @@
                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="18">
                 <small class="form-text text-muted">La contraseña debe tener al menos 10 caracteres, una letra mayúscula, una minúscula y un número.</small>
             </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirmar contraseña:</label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Vuelve a ingresar tu contraseña" required maxlength="18">
+            </div>
             <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
         </form>
 
@@ -75,13 +79,11 @@
         const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
         localStorage.setItem('deviceID', deviceID);
 
-        // Validación de contraseña segura
         function isPasswordSecure(password) {
             const minLength = 10;
             const hasUpperCase = /[A-Z]/.test(password);
             const hasLowerCase = /[a-z]/.test(password);
             const hasNumber = /[0-9]/.test(password);
-
             return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber;
         }
 
@@ -90,9 +92,17 @@
 
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('message');
 
+            // Validar que las contraseñas coincidan
+            if (password !== confirmPassword) {
+                messageDiv.innerHTML = `<div class="alert alert-danger">Las contraseñas no coinciden.</div>`;
+                return;
+            }
+
+            // Validar seguridad de la contraseña
             if (!isPasswordSecure(password)) {
-                const messageDiv = document.getElementById('message');
                 messageDiv.innerHTML = `<div class="alert alert-danger">La contraseña no cumple con los requisitos de seguridad.</div>`;
                 return;
             }
@@ -100,15 +110,12 @@
             try {
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, deviceID }),
                 });
 
                 const data = await response.json();
 
-                const messageDiv = document.getElementById('message');
                 if (response.ok) {
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
                 } else {
@@ -116,7 +123,6 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                const messageDiv = document.getElementById('message');
                 messageDiv.innerHTML = `<div class="alert alert-danger">Error al enviar la solicitud.</div>`;
             }
         });
