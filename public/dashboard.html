@@ -1,81 +1,98 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            color: white;
-            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
         }
         .container {
-            max-width: 550px;
+            max-width: 500px;
             margin: auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: white;
             border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease-in-out;
+            padding: 20px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
         }
         .container:hover {
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
         h2 {
-            font-size: 26px;
-            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 20px;
+            font-size: 24px;
             text-align: center;
         }
-        .btn-custom {
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s ease;
+        .btn {
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            margin: 10px 0;
+            width: 100%;
+            transition: transform 0.2s;
         }
-        .btn-custom:hover {
+        .btn:hover {
             transform: scale(1.05);
         }
-        .btn-success { background-color: #28a745; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-warning { background-color: #ffc107; }
-        #locationDisplay, #photo {
-            background: rgba(255, 255, 255, 0.2);
+        #locationDisplay {
+            margin-top: 15px;
             padding: 15px;
+            border: 1px solid #ccc;
             border-radius: 10px;
+            background-color: #e9ecef;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #locationDisplay h5 {
+            color: #343a40;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        #location {
+            font-size: 16px;
+            color: #555;
+        }
+        #timestamp {
+            font-size: 14px;
+            color: #777;
+        }
+        #message {
+            margin-top: 15px;
+        }
+        #photo {
+            margin-top: 15px;
             text-align: center;
         }
         #photo img {
             border-radius: 10px;
-            max-width: 60%;
+            max-width: 48%; /* Ajustamos el tamaño de la imagen */
             height: auto;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5 text-center">
-        <h2 id="welcomeMessage"></h2>
-        <button id="entradaBtn" class="btn btn-success btn-custom w-100 mt-3">
-            <i class="fas fa-sign-in-alt"></i> Registro de Entrada
-        </button>
-        <button id="salidaBtn" class="btn btn-danger btn-custom w-100 mt-3">
-            <i class="fas fa-sign-out-alt"></i> Registro de Salida
-        </button>
-        <button id="logoutBtn" class="btn btn-warning btn-custom w-100 mt-3">
-            <i class="fas fa-power-off"></i> Cerrar Sesión
-        </button>
-
-        <div id="locationDisplay" class="mt-4">
-            <h5>📍 Ubicación Actual</h5>
-            <p id="location">Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
-            <p id="timestamp">📅 <span id="dateTime">-</span></p>
+    <div class="container mt-5">
+        <h2 class="text-center" id="welcomeMessage"></h2>
+        <div class="text-center">
+            <button id="entradaBtn" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Registro de Entrada</button>
+            <button id="salidaBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Registro de Salida</button>
+            <button id="logoutBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
         </div>
 
-        <div id="photo" class="mt-4">
-            <h5>📸 Foto Capturada</h5>
+        <div id="locationDisplay" class="mt-3">
+            <h5>Ubicación Actual:</h5>
+            <p id="location">Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
+            <p id="timestamp">Fecha y Hora: <span id="dateTime">-</span></p>
+        </div>
+
+        <div id="photo">
+            <h5>Foto Capturada:</h5>
             <img id="capturedPhoto" src="#" alt="Foto no disponible" />
         </div>
 
@@ -83,20 +100,24 @@
     </div>
 
     <script>
-        const referenceLocation = { lat: 4.368173, lng: -75.136478 };
-        const maxDistance = 5000;
+        const referenceLocation = {
+            lat: 4.368173,
+            lng: -75.136478 ,
+        };
+        const maxDistance = 5000; // Distancia máxima en metros
 
         const videoElement = document.createElement("video");
-        const userName = localStorage.getItem('username') || 'Usuario';
-        const userID = '678d2aee2ec1cbd8499dc892';
 
+// Suponiendo que estas variables contienen los valores del usuario autenticado
+        const userName = 'Ivan'; // Reemplaza con la variable que contiene el nombre del usuario
+        const userID = '678d2aee2ec1cbd8499dc892'; // Reemplaza con la variable que contiene el ID del usuario
         async function getLocation() {
             if (navigator.geolocation) {
                 return new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 });
             } else {
-                throw new Error("La geolocalización no es soportada.");
+                throw new Error("La geolocalización no es soportada por este navegador.");
             }
         }
 
@@ -108,7 +129,8 @@
                       Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
                       Math.sin(dLon / 2) * Math.sin(dLon / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c * 1000;
+            const distance = R * c * 1000; // Convertir a metros
+            return distance;
         }
 
         async function showPosition(position) {
@@ -123,40 +145,66 @@
             return distance <= maxDistance;
         }
 
-        async function capturePhoto() {
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+         async function capturePhoto() {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
 
-            videoElement.srcObject = stream;
-            videoElement.play();
-            await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoElement.srcObject = stream;
+    videoElement.play();
 
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            context.drawImage(videoElement, 0, 0);
+    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
 
-            context.font = '20px Arial';
-            context.fillStyle = 'white';
-            context.fillText(`Usuario: ${userName}`, 10, canvas.height - 80);
-            context.fillText(`Fecha: ${new Date().toLocaleString()}`, 10, canvas.height - 40);
+    context.drawImage(videoElement, 0, 0);
 
-            document.getElementById("capturedPhoto").src = canvas.toDataURL("image/png");
-            stream.getTracks().forEach(track => track.stop());
-        }
+    // Obtener username desde localStorage
+    const username = localStorage.getItem('username') || 'Usuario Desconocido';
+    const deviceID = localStorage.getItem('deviceID') || 'deviceID Desconocido';
+
+    // Obtener fecha, hora y ubicación actual
+    const dateTime = new Date().toLocaleString();
+    const lat = document.getElementById('latitude').textContent;
+    const lng = document.getElementById('longitude').textContent;
+    const location = `Lat: ${lat}, Lng: ${lng}`;
+
+    // Agregar texto sobre la imagen con los datos reales del usuario
+    context.font = '20px Arial';
+    context.fillStyle = 'white';
+    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
+    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+
+    const imageData = canvas.toDataURL("image/png");
+
+    document.getElementById("capturedPhoto").src = imageData;
+    stream.getTracks().forEach(track => track.stop());
+     }
+        
 
         async function handleRegister(endpoint) {
             try {
                 const position = await getLocation();
-                const isAllowed = await showPosition(position);
+                const isWithinAllowedDistance = await showPosition(position);
 
-                if (!isAllowed) {
-                    document.getElementById('message').innerHTML = '<div class="alert alert-danger">❌ Acércate a la ubicación permitida.</div>';
+                if (!isWithinAllowedDistance) {
+                    document.getElementById('message').innerHTML = '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
                     return;
                 }
 
                 await capturePhoto();
-                document.getElementById('message').innerHTML = `<div class="alert alert-info">✅ Registro exitoso.</div>`;
+
+                const userId = userID; // Utilizamos el ID del usuario
+                const deviceID = localStorage.getItem('deviceID');
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, deviceID, ubicacion: { lat: position.coords.latitude, lng: position.coords.longitude } }),
+                });
+                const data = await response.json();
+                document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
             } catch (error) {
                 document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
             }
@@ -166,11 +214,17 @@
         document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            document.getElementById('message').innerHTML = '<div class="alert alert-success">🔒 Sesión cerrada.</div>';
-            setTimeout(() => window.location.href = 'login.html', 1000);
+            // Mostrar el mensaje de cierre de sesión
+            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+            
+            // Redirigir a la página de login
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000); // La redirección ocurrirá después de 1 segundo (1000 ms) para dar tiempo al mensaje
         });
-
-        document.getElementById('welcomeMessage').textContent = `🔥 ¡Bienvenido, ${userName}! 🚀`;
+     // Obtener el nombre del usuario desde localStorage o usar un valor por defecto
+const username = localStorage.getItem('username') || 'Usuario';
+document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${username}! Listo para marcar tu registro con estilo. 🚀`;
     </script>
 </body>
 </html>
