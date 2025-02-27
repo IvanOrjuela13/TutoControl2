@@ -1,29 +1,45 @@
-const express = require('express');
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs'); // Para encriptar contraseñas
-
+Este es mi routes/auth.js const express = require('express');
+const User = require('../models/User'); 
+const jwt = require('jsonwebtoken'); 
 const router = express.Router();
 
 // Ruta para el registro de usuarios
 router.post('/register', async (req, res) => {
-    const { fullName, cedula, area, username, password, deviceID } = req.body;
+    const { fullName, cedula, area, username, password, deviceID } = req.body; 
 
     try {
+        // Verificar que todos los campos obligatorios están presentes
         if (!fullName || !cedula || !area || !username || !password || !deviceID) {
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
         }
 
+        // Verificar si el usuario ya existe
         const existingUser = await User.findOne({ username });
-        if (existingUser) return res.status(400).json({ msg: 'El nombre de usuario ya está en uso' });
+        if (existingUser) {
+            return res.status(400).json({ msg: 'El nombre de usuario ya está en uso' });
+        }
 
+        // Verificar si la cédula ya está registrada
         const existingCedula = await User.findOne({ cedula });
-        if (existingCedula) return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
+        if (existingCedula) {
+            return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
+        }
 
+        // Verificar si el dispositivo ya tiene un usuario registrado
         const existingDevice = await User.findOne({ deviceID });
-        if (existingDevice) return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
+        if (existingDevice) {
+            return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
+        }
 
-        const newUser = new User({ fullName, cedula, area, username, password, deviceID });
+        // Crear nuevo usuario
+        const newUser = new User({
+            fullName,
+            cedula,
+            area,
+            username,
+            password,
+            deviceID
+        });
 
         await newUser.save();
         res.status(201).json({ msg: 'Usuario creado exitosamente' });
@@ -36,17 +52,24 @@ router.post('/register', async (req, res) => {
 
 // Ruta para el inicio de sesión
 router.post('/login', async (req, res) => {
-    const { username, password, deviceID } = req.body;
+    const { username, password, deviceID } = req.body; 
 
     try {
         let user = await User.findOne({ username });
 
-        if (!user) return res.status(400).json({ msg: 'Usuario no encontrado' });
+        if (!user) {
+            return res.status(400).json({ msg: 'Usuario no encontrado' });
+        }
 
         const isMatch = await user.matchPassword(password);
-        if (!isMatch) return res.status(400).json({ msg: 'Contraseña incorrecta' });
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Contraseña incorrecta' });
+        }
 
-        if (user.deviceID !== deviceID) return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
+        // Verifica si el deviceID coincide
+        if (user.deviceID !== deviceID) {
+            return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
+        }
 
         const payload = { userId: user._id };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -65,35 +88,15 @@ router.get('/user/:username', async (req, res) => {
 
     try {
         const user = await User.findOne({ username });
-        if (!user) return res.status(404).json({ msg: 'Usuario no encontrado' });
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
 
         res.json({ deviceID: user.deviceID });
 
     } catch (error) {
         console.error("Error en el servidor:", error.message);
         res.status(500).send('Error en el servidor');
-    }
-});
-
-// Ruta para modificar la contraseña
-router.post('/reset-password', async (req, res) => {
-    const { username, newPassword } = req.body;
-
-    try {
-        const user = await User.findOne({ username });
-        if (!user) return res.status(404).json({ msg: 'Usuario no encontrado' });
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-        user.password = hashedPassword;
-        await user.save();
-
-        res.json({ msg: 'Contraseña actualizada correctamente' });
-
-    } catch (error) {
-        console.error("Error en el servidor:", error);
-        res.status(500).json({ msg: 'Error en el servidor' });
     }
 });
 
