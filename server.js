@@ -11,42 +11,33 @@ const app = express();
 // Conectar a la base de datos
 connectDB();
 
-// Middleware para JSON y CORS
+// Middleware para JSON
 app.use(express.json());
+
+// Middleware para CORS
 app.use(cors());
 
-// Servir archivos estáticos
+// Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Redirigir la raíz a login
+// Redirigir la raíz a /register
 app.get('/', (req, res) => {
-    res.redirect('/login');
+    res.redirect('/register');
 });
 
-// Rutas públicas (Login y Registro)
+// Ruta para el archivo register.html
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
+// Ruta para el archivo login.html
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Middleware para proteger rutas privadas
-app.use((req, res, next) => {
-    const rutasPublicas = ['/login', '/register', '/api/auth/login', '/api/auth/register'];
-    
-    if (!rutasPublicas.includes(req.path) && !req.headers.authorization) {
-        return res.redirect('/login'); // Redirige si no tiene token
-    }
-    next();
-});
-
-// Rutas de autenticación y registro de usuarios
+// Rutas
 app.use('/api/auth', authRoutes);
-
-// 🔒 Rutas protegidas
-app.use('/api/registro', registroRoutes);
+app.use('/api/registro', registroRoutes); // Usar la nueva ruta para registro
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
