@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
+const bcrypt = require('bcryptjs');
 
 // Ruta para restablecer la contraseña
 router.post('/reset-password', async (req, res) => {
@@ -14,8 +15,9 @@ router.post('/reset-password', async (req, res) => {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
 
-        // Actualiza la contraseña del usuario
-        user.password = newPassword; 
+        // Hashear la nueva contraseña antes de guardarla
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
         await user.save();
 
         res.json({ msg: 'Contraseña actualizada exitosamente' });
@@ -25,8 +27,6 @@ router.post('/reset-password', async (req, res) => {
         res.status(500).json({ msg: 'Error en el servidor' });
     }
 });
-
-// Otras rutas se mantienen igual...
 
 // Ruta para el registro de usuarios
 router.post('/register', async (req, res) => {
@@ -52,12 +52,16 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
         }
 
+        // Hashear la contraseña antes de guardarla
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const newUser = new User({
             fullName,
             cedula,
             area,
             username,
-            password,
+            password: hashedPassword,
             deviceID
         });
 
@@ -81,7 +85,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Usuario no encontrado' });
         }
 
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ msg: 'Contraseña incorrecta' });
         }
@@ -116,6 +120,28 @@ router.get('/user/:username', async (req, res) => {
     } catch (error) {
         console.error("Error en el servidor:", error.message);
         res.status(500).send('Error en el servidor');
+    }
+});
+
+// Ruta para obtener la información del usuario autenticado (para la foto)
+router.get('/user-info', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1]; // Obtener token del header
+        if (!token) {
+            return res.status(401).json({ msg: 'No autorizado' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId).select("fullName cedula username deviceID");
+
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error("Error al obtener la información del usuario:", error);
+        res.status(500).json({ msg: 'Error en el servidor' });
     }
 });
 
