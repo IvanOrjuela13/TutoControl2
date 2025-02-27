@@ -151,7 +151,7 @@
 
         <div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-            <img id="capturedPhoto"  src="#" alt="Foto no disponible" /> 
+            <img id="capturedPhoto" src="#" alt="Foto no disponible" style="display: none;" />
 </div>
 
         <div id="message" class="mt-3"></div>
@@ -215,6 +215,12 @@
     canvas.height = videoElement.videoHeight;
 
     context.drawImage(videoElement, 0, 0);
+             
+function mostrarFoto(url) {
+    let img = document.getElementById("capturedPhoto");
+    img.src = url;
+    img.style.display = "block"; // Muestra la imagen cuando tenga una foto
+}
 
     // Obtener username desde localStorage
     const username = localStorage.getItem('username') || 'Usuario Desconocido';
