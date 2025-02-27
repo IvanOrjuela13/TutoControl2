@@ -150,8 +150,19 @@
         
     <div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-            <img id="capturedPhoto"  src="#" alt="Foto no disponible" />
+    <img id="capturedPhoto" src="#" alt="Foto no disponible" />
 </div>
+
+<style>
+    #capturedPhoto {
+        width: 100%; /* Ajusta el tamaño según lo necesites */
+        height: 200px; /* Altura fija */
+        background-color: #f0f0f0; /* Color de fondo gris claro */
+        display: block; /* Asegura que el fondo cubra toda el área */
+        object-fit: cover; /* Ajusta la imagen si se carga correctamente */
+    }
+</style>
+
         
 <script>
     function mostrarError() {
