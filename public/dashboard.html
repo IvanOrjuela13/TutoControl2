@@ -77,42 +77,6 @@
     </style>
 </head>
 <body>
-    <script>
-    async function verificarAcceso() {
-        const deviceID = localStorage.getItem('deviceID');
-
-        if (!deviceID) {
-            bloquearAcceso();
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/verificar-dispositivo', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deviceID })
-            });
-
-            const data = await response.json();
-
-            if (!data.autorizado) {
-                bloquearAcceso();
-            }
-        } catch (error) {
-            bloquearAcceso();
-        }
-    }
-
-    function bloquearAcceso() {
-        document.body.innerHTML = "<h3 style='text-align:center; margin-top:20%; color:red;'>Prohibido el ingreso</h3>";
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 60000);
-    }
-
-    verificarAcceso();
-</script>
-
     <div class="container mt-5">
         <h2 class="text-center">Dashboard <i class="fas fa-tachometer-alt"></i></h2>
         <div class="text-center">
