@@ -207,7 +207,7 @@
             return distance <= maxDistance;
         }
     
-    async function capturePhoto(fullName, cedula) {
+    async function capturePhoto() {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -220,9 +220,10 @@
 
     context.drawImage(videoElement, 0, 0);
 
-    // Obtener otros datos
-    const username = localStorage.getItem('username') || 'Usuario Desconocido';
-    const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
+    // Obtener datos desde la base de datos
+    const userData = await fetchUserData();
+    
+    // Obtener fecha, hora y ubicación actual
     const dateTime = new Date().toLocaleString();
     const lat = document.getElementById('latitude').textContent;
     const lng = document.getElementById('longitude').textContent;
@@ -231,77 +232,42 @@
     // Agregar texto sobre la imagen con los datos del usuario
     context.font = '20px Arial';
     context.fillStyle = 'white';
-    context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 140);
-    context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 120);
-    context.fillText(`Usuario: ${username}`, 10, canvas.height - 100);
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 80);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 60);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 40);
+    context.fillText(`Nombre: ${userData.fullName}`, 10, canvas.height - 120);
+    context.fillText(`Cédula: ${userData.cedula}`, 10, canvas.height - 100);
+    context.fillText(`Usuario: ${userData.username}`, 10, canvas.height - 80);
+    context.fillText(`ID: ${userData.deviceID}`, 10, canvas.height - 60);
+    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
 
     const imageData = canvas.toDataURL("image/png");
+
     document.getElementById("capturedPhoto").src = imageData;
     stream.getTracks().forEach(track => track.stop());
 }
 
-
-        async function handleRegister(endpoint) {
-    try {
-        const position = await getLocation();
-        const isWithinAllowedDistance = await showPosition(position);
-
-        if (!isWithinAllowedDistance) {
-            document.getElementById('message').innerHTML = '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
-            return;
-        }
-
-        // 1️⃣ Obtener datos del usuario desde la base de datos
-        const userData = await fetchUserData(); // Función que obtiene los datos desde la API
-
-        // 2️⃣ Capturar la foto con los datos del usuario
-        await capturePhoto(userData.fullName, userData.cedula);
-
-        const userId = userID; // ID del usuario autenticado
-        const deviceID = localStorage.getItem('deviceID');
-
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId,
-                deviceID,
-                ubicacion: {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                }
-            }),
-        });
-
-        const data = await response.json();
-        document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
-
-    } catch (error) {
-        document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-    }
-}
-
   async function fetchUserData() {
     try {
-        const response = await fetch('/api/user'); // Ruta donde obtienes los datos
+        const response = await fetch('/api/user'); // Ruta de tu API para obtener los datos del usuario
         if (!response.ok) throw new Error('Error al obtener los datos');
         const data = await response.json();
-
+        
         return {
             fullName: data.fullName || 'Nombre No Disponible',
-            cedula: data.cedula || 'Cédula No Disponible'
+            cedula: data.cedula || 'Cédula No Disponible',
+            username: data.username || 'Usuario Desconocido',
+            deviceID: data.deviceID || 'ID Desconocido'
         };
     } catch (error) {
         console.error(error);
         return {
             fullName: 'Error al obtener',
-            cedula: 'Error al obtener'
+            cedula: 'Error al obtener',
+            username: 'Error al obtener',
+            deviceID: 'Error al obtener'
         };
     }
 }
+
       document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
         document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
         document.getElementById('logoutBtn').addEventListener('click', () => {
