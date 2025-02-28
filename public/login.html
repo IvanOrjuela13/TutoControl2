@@ -13,14 +13,13 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header text-center bg-primary text-white">
-                        <h3>Iniciar Sesión</h3>
-                    </div>
+    <h3>Iniciar Sesión</h3>
+</div>
                     <div class="card-body">
                         <form id="loginForm">
-                            <!-- Cambio: Campo de Cédula en lugar de Nombre de Usuario -->
                             <div class="mb-3">
-                                <label for="cedula" class="form-label">Número de Cédula</label>
-                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu número de cédula" required>
+                                <label for="username" class="form-label">Nombre de Usuario</label>
+                                <input type="text" class="form-control" id="username" placeholder="Ingresa tu usuario" required>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
@@ -50,12 +49,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Ingresa tu cédula y una nueva contraseña.</p>
+                    <p>Ingresa tu usuario y una nueva contraseña.</p>
                     <form id="resetPasswordForm">
-                        <!-- Campo de Cédula para restablecer contraseña -->
                         <div class="mb-3">
-                            <label for="resetCedula" class="form-label">Número de Cédula</label>
-                            <input type="text" class="form-control" id="resetCedula" placeholder="Ingresa tu número de cédula" required>
+                            <label for="resetUsername" class="form-label">Usuario</label>
+                            <input type="text" class="form-control" id="resetUsername" placeholder="Ingresa tu usuario" required>
                         </div>
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">Nueva Contraseña</label>
@@ -77,8 +75,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Cambié "username" por "cedula" aquí
-            const cedula = document.getElementById('cedula').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
             try {
@@ -87,14 +84,14 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ cedula, password, deviceID }),
+                    body: JSON.stringify({ username, password, deviceID }),
                 });
 
                 const data = await response.json();
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
-                    localStorage.setItem('cedula', cedula); // Usar cédula en lugar de nombre de usuario
+                    localStorage.setItem('username', username);
                     localStorage.setItem('token', data.token);
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
                     setTimeout(() => window.location.href = 'dashboard.html', 1000);
@@ -111,7 +108,7 @@
         document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const resetCedula = document.getElementById('resetCedula').value;
+            const resetUsername = document.getElementById('resetUsername').value;
             const newPassword = document.getElementById('newPassword').value;
 
             try {
@@ -120,7 +117,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ cedula: resetCedula, newPassword }),
+                    body: JSON.stringify({ username: resetUsername, newPassword }),
                 });
 
                 const data = await response.json();
