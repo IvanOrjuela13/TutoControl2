@@ -207,45 +207,69 @@
             return distance <= maxDistance;
         }
     
+    
     async function capturePhoto() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoElement.srcObject = stream;
-    videoElement.play();
+    try {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const videoElement = document.createElement("video");
 
-    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
+        videoElement.srcObject = stream;
+        videoElement.play();
 
-    context.drawImage(videoElement, 0, 0);
+        // Esperar a que el video esté listo
+        await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
 
-    // Obtener datos desde localStorage
-    const username = localStorage.getItem('username') || 'Usuario Desconocido';
-    const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
-    const fullName = localStorage.getItem('fullName') || 'Nombre No Disponible';
-    const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
+        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-    // Obtener fecha, hora y ubicación actual
-    const dateTime = new Date().toLocaleString();
-    const lat = document.getElementById('latitude').textContent;
-    const lng = document.getElementById('longitude').textContent;
-    const location = `Lat: ${lat}, Lng: ${lng}`;
+        // Obtener datos desde localStorage
+        const username = localStorage.getItem('username') || 'Usuario Desconocido';
+        const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
+        const fullName = localStorage.getItem('fullName') || 'Nombre No Disponible';
+        const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
 
-    // Agregar texto sobre la imagen con los datos del usuario
-    context.font = '20px Arial';
-    context.fillStyle = 'white';
-    context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
-    context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
-    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+        // Obtener fecha, hora y ubicación actual
+        const dateTime = new Date().toLocaleString();
+        const lat = document.getElementById('latitude').textContent;
+        const lng = document.getElementById('longitude').textContent;
+        const location = `Lat: ${lat}, Lng: ${lng}`;
 
-    const imageData = canvas.toDataURL("image/png");
+        // Estilizar texto
+        context.font = '18px Arial';
+        context.fillStyle = 'white';
+        context.strokeStyle = 'black';
+        context.lineWidth = 3;
 
-    document.getElementById("capturedPhoto").src = imageData;
-    stream.getTracks().forEach(track => track.stop());
+        // Función para dibujar texto con contorno
+        function drawText(text, x, y) {
+            context.strokeText(text, x, y);
+            context.fillText(text, x, y);
+        }
+
+        // Dibujar datos sobre la imagen
+        const textX = 10;
+        let textY = canvas.height - 150;
+        drawText(`Nombre: ${fullName}`, textX, textY);
+        drawText(`Cédula: ${cedula}`, textX, (textY += 25));
+        drawText(`Usuario: ${username}`, textX, (textY += 25));
+        drawText(`ID: ${deviceID}`, textX, (textY += 25));
+        drawText(`Fecha: ${dateTime}`, textX, (textY += 25));
+        drawText(`Ubicación: ${location}`, textX, (textY += 25));
+
+        // Convertir la imagen a Base64
+        const imageData = canvas.toDataURL("image/png");
+        document.getElementById("capturedPhoto").src = imageData;
+
+        // Detener la cámara
+        stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+        console.error("Error al capturar la foto:", error);
+    }
+}
+
 }
 
         async function handleRegister(endpoint) {
