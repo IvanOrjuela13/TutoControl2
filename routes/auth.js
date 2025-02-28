@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 
 // Ruta para restablecer la contraseña
@@ -8,16 +9,26 @@ router.post('/reset-password', async (req, res) => {
     const { cedula, newPassword } = req.body;
 
     try {
+        // Buscar al usuario por cédula
         const user = await User.findOne({ cedula });
 
         if (!user) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
 
-        // Actualiza la contraseña del usuario
-        user.password = newPassword; 
+        // Validar que la nueva contraseña sea válida
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ msg: 'La contraseña debe tener al menos 6 caracteres' });
+        }
+
+        // Encriptar la nueva contraseña
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        // Guardar el usuario con la nueva contraseña encriptada
         await user.save();
 
+        // Enviar respuesta de éxito
         res.json({ msg: 'Contraseña actualizada exitosamente' });
 
     } catch (error) {
@@ -45,11 +56,15 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
         }
 
+        // Encriptar la contraseña
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const newUser = new User({
             fullName,
             cedula,
             area,
-            password,
+            password: hashedPassword,
             deviceID
         });
 
@@ -73,7 +88,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Usuario no encontrado' });
         }
 
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ msg: 'Contraseña incorrecta' });
         }
