@@ -207,27 +207,15 @@
             return distance <= maxDistance;
         }
     
-    async function capturePhoto() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoElement.srcObject = stream;
-    videoElement.play();
-
-    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-
-    context.drawImage(videoElement, 0, 0);
-        
-async function fetchUserData() {
+    async function fetchUserData() {
     try {
-        // 1. Obtener el usuario activo del almacenamiento local
-        const username = localStorage.getItem('username');
-        const token = localStorage.getItem('token'); // Si usas autenticación JWT
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No hay token disponible");
+            return null;
+        }
 
-        // 2. Hacer una solicitud a la API para obtener los datos del usuario
-        const response = await fetch(`/api/auth/user/${username}`, {
+        const response = await fetch(`/api/auth/user`, {  // Cambia la ruta según tu backend
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -239,27 +227,39 @@ async function fetchUserData() {
         }
 
         const data = await response.json();
-
-        // 3. Guardar los datos en el navegador (localStorage)
-        localStorage.setItem('fullName', data.fullName);
-        localStorage.setItem('cedula', data.cedula);
-        localStorage.setItem('area', data.area);
+        return data; // Retorna los datos directamente
     } catch (error) {
         console.error("Error al obtener los datos del usuario:", error.message);
+        return null;
     }
 }
 
-        // Llamamos a la función para obtener los datos antes de capturar la foto
-    await fetchUserData();
+async function capturePhoto() {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoElement.srcObject = stream;
+    videoElement.play();
 
-    // Obtener los datos actualizados del usuario desde localStorage
-    const username = localStorage.getItem('username') || 'Usuario Desconocido';
+    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+
+    context.drawImage(videoElement, 0, 0);
+
+    // Obtener datos del usuario en tiempo real
+    const userData = await fetchUserData();
+
+    if (!userData) {
+        console.error("No se pudieron obtener los datos del usuario.");
+        return;
+    }
+
+    // Obtener los datos del usuario directamente sin localStorage
+    const fullName = userData.fullName || 'Nombre No Disponible';
+    const cedula = userData.cedula || 'Cédula No Disponible';
+    const username = userData.username || 'Usuario Desconocido';
     const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
-    const fullName = localStorage.getItem('fullName') || 'Nombre No Disponible';
-    const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
-
-    // Aquí ya puedes dibujar estos datos en la imagen como lo haces actualmente
-
 
     // Obtener fecha, hora y ubicación actual
     const dateTime = new Date().toLocaleString();
@@ -281,6 +281,8 @@ async function fetchUserData() {
 
     document.getElementById("capturedPhoto").src = imageData;
     stream.getTracks().forEach(track => track.stop());
+}
+
 }
 
         async function handleRegister(endpoint) {
