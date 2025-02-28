@@ -18,7 +18,7 @@
                     <div class="card-body">
                         <form id="loginForm">
                             <div class="mb-3">
-                                <label for="cedula" class="form-label">Número de Cédula</label>
+                                <label for="cedula" class="form-label">Cédula</label>
                                 <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
                             </div>
                             <div class="mb-3">
@@ -94,49 +94,18 @@
                     localStorage.setItem('cedula', cedula);
                     localStorage.setItem('token', data.token);
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    // Redirigir a la página de registros o dashboard
+                    window.location.href = '/dashboard.html';
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en la solicitud</div>`;
-            }
-        });
-
-        // Manejar el formulario de restablecimiento de contraseña
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const resetCedula = document.getElementById('resetCedula').value;
-            const newPassword = document.getElementById('newPassword').value;
-
-            try {
-                const response = await fetch('/api/auth/reset-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ cedula: resetCedula, newPassword }),
-                });
-
-                const data = await response.json();
-                const resetMessageDiv = document.getElementById('resetMessage');
-
-                if (response.ok) {
-                    resetMessageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    setTimeout(() => location.reload(), 1500); // Recargar página después de actualizar contraseña
-                } else {
-                    resetMessageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">Error en la solicitud</div>`;
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
             }
         });
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
