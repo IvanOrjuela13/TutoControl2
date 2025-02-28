@@ -20,21 +20,21 @@
                             <label for="fullName" class="form-label">Nombre Completo</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required>
+                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="cedula" class="form-label">Cédula</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
+                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="area" class="form-label">Área</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                                <select class="form-control" id="area" required>
+                                <select class="form-control" id="area">
                                     <option value="" disabled selected>Selecciona tu área</option>
                                     <option value="Matemáticas">Matemáticas</option>
                                     <option value="Física">Física</option>
@@ -53,14 +53,14 @@
                             <label for="password" class="form-label">Contraseña</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="18">
+                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" maxlength="18">
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" required maxlength="18">
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" maxlength="18">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 btn-lg">Registrarse</button>
@@ -77,21 +77,28 @@
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const fullName = document.getElementById('fullName').value;
-            const cedula = document.getElementById('cedula').value;
+            // Obtener los valores de los campos
+            const fullName = document.getElementById('fullName').value.trim();
+            const cedula = document.getElementById('cedula').value.trim();
             const area = document.getElementById('area').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            let deviceID = localStorage.getItem('deviceID');
-            if (!deviceID) {
-                deviceID = 'device-' + Date.now();
-                localStorage.setItem('deviceID', deviceID);
+
+            // Validación personalizada en JS
+            if (!fullName || !cedula || !area || !password || !confirmPassword) {
+                alert('Todos los campos son obligatorios.');
+                return;
             }
 
             if (password !== confirmPassword) {
                 alert('Las contraseñas no coinciden');
                 return;
+            }
+
+            let deviceID = localStorage.getItem('deviceID');
+            if (!deviceID) {
+                deviceID = 'device-' + Date.now();
+                localStorage.setItem('deviceID', deviceID);
             }
 
             try {
