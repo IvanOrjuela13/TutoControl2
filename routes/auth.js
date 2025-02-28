@@ -101,6 +101,36 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Ruta para obtener nombre y cédula del usuario autenticado
+router.get('/api/user', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1]; // Extraer el token del header
+        if (!token) {
+            return res.status(401).json({ msg: "Acceso no autorizado" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verificar el token
+        const user = await User.findById(decoded.userId); // Buscar usuario en la base de datos
+
+        if (!user) {
+            return res.status(404).json({ msg: "Usuario no encontrado" });
+        }
+
+        res.json({
+            fullName: user.fullName,
+            cedula: user.cedula,
+            username: user.username,
+            deviceID: user.deviceID
+        });
+
+    } catch (error) {
+        console.error("Error al obtener datos del usuario:", error.message);
+        res.status(500).json({ msg: "Error en el servidor" });
+    }
+});
+
+
+
 // Ruta para obtener el deviceID del usuario
 router.get('/user/:username', async (req, res) => {
     const { username } = req.params;
