@@ -327,14 +327,8 @@ async function fetchUserData() {
     }
 }
 
-async function capturePhoto() {
+async function captureTest() {
     try {
-        const userData = await fetchUserData();
-        const fullName = userData?.fullName || 'Nombre No Disponible';
-        const cedula = userData?.cedula || 'Cédula No Disponible';
-        const username = localStorage.getItem('username') || 'Usuario Desconocido';
-        const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
-
         const videoElement = document.getElementById("videoElement");
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -351,35 +345,19 @@ async function capturePhoto() {
         // Dibujar la imagen del video en el canvas
         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-        // Obtener la ubicación
-        const lat = document.getElementById('latitude')?.textContent || 'Desconocido';
-        const lng = document.getElementById('longitude')?.textContent || 'Desconocido';
-        const dateTime = new Date().toLocaleString();
-        const location = `Lat: ${lat}, Lng: ${lng}`;
-
-        // Dibujar texto sobre la imagen
-        context.font = '20px Arial';
-        context.fillStyle = 'white';
-        context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
-        context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
-        context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
-        context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-        context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-        context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
-
-        // Obtener la imagen en base64
+        // Obtener la imagen en base64 y mostrarla
         const imageData = canvas.toDataURL("image/png");
-
-        // Asignar la imagen al elemento <img>
         document.getElementById("capturedPhoto").src = imageData;
 
-        // Detener la cámara después de capturar la foto
+        // Detener la cámara
         stream.getTracks().forEach(track => track.stop());
 
+        console.log("Foto capturada correctamente");
     } catch (error) {
         console.error("Error al capturar la foto:", error.message);
     }
 }
+
 
 
         async function handleRegister(endpoint) {
