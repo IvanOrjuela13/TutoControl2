@@ -5,10 +5,10 @@ const router = express.Router();
 
 // Ruta para restablecer la contraseña
 router.post('/reset-password', async (req, res) => {
-    const { username, newPassword } = req.body;
+    const { cedula, newPassword } = req.body;
 
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ cedula });
 
         if (!user) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
@@ -26,24 +26,17 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// Otras rutas se mantienen igual...
-
 // Ruta para el registro de usuarios
 router.post('/register', async (req, res) => {
-    const { fullName, cedula, area, username, password, deviceID } = req.body;
+    const { fullName, cedula, area, password, deviceID } = req.body;
 
     try {
-        if (!fullName || !cedula || !area || !username || !password || !deviceID) {
+        if (!fullName || !cedula || !area || !password || !deviceID) {
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
         }
 
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ cedula });
         if (existingUser) {
-            return res.status(400).json({ msg: 'El nombre de usuario ya está en uso' });
-        }
-
-        const existingCedula = await User.findOne({ cedula });
-        if (existingCedula) {
             return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
         }
 
@@ -56,7 +49,6 @@ router.post('/register', async (req, res) => {
             fullName,
             cedula,
             area,
-            username,
             password,
             deviceID
         });
@@ -72,10 +64,10 @@ router.post('/register', async (req, res) => {
 
 // Ruta para el inicio de sesión
 router.post('/login', async (req, res) => {
-    const { username, password, deviceID } = req.body;
+    const { cedula, password, deviceID } = req.body;
 
     try {
-        let user = await User.findOne({ username });
+        let user = await User.findOne({ cedula });
 
         if (!user) {
             return res.status(400).json({ msg: 'Usuario no encontrado' });
@@ -102,11 +94,11 @@ router.post('/login', async (req, res) => {
 });
 
 // Ruta para obtener el deviceID del usuario
-router.get('/user/:username', async (req, res) => {
-    const { username } = req.params;
+router.get('/user/:cedula', async (req, res) => {
+    const { cedula } = req.params;
 
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ cedula });
         if (!user) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
