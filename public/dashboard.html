@@ -260,42 +260,71 @@ async function fetchUserData() {
     }
 }
 
-async function capturePhoto() {
+async function fetchUserData() {
     try {
-        // Obtener datos del usuario en tiempo real
-        const userData = await fetchUserData();
-        if (!userData) {
-            alert("Error al obtener los datos del usuario. Inténtalo nuevamente.");
-            return;
+        const username = localStorage.getItem('username');
+        const token = localStorage.getItem('token'); 
+
+        if (!username || !token) {
+            throw new Error("Usuario no autenticado");
         }
 
-        const videoElement = document.getElementById("videoElement");
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
+        const response = await fetch(`/api/auth/user/${username}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-        // Activar la cámara
+        if (!response.ok) {
+            throw new Error("No se pudieron obtener los datos del usuario");
+        }
+
+        const data = await response.json();
+        
+        // Guardar los datos actualizados en localStorage
+        localStorage.setItem('fullName', data.fullName);
+        localStorage.setItem('cedula', data.cedula);
+        localStorage.setItem('area', data.area);
+        
+        return data;
+    } catch (error) {
+        console.error("Error al obtener los datos del usuario:", error.message);
+        return null;
+    }
+}
+
+async function capturePhoto() {
+    try {
+        // Capturar datos del usuario antes de tomar la foto
+        const userData = await fetchUserData();
+        
+        // Si no se pudieron obtener los datos, usar valores predeterminados
+        const fullName = userData?.fullName || 'Nombre No Disponible';
+        const cedula = userData?.cedula || 'Cédula No Disponible';
+        const username = localStorage.getItem('username') || 'Usuario Desconocido';
+        const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
+
+        // Iniciar la cámara
+        const videoElement = document.getElementById("videoElement");
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         videoElement.srcObject = stream;
         await new Promise(resolve => videoElement.onloadedmetadata = resolve);
 
-        // Configurar tamaño del canvas
+        // Capturar la imagen
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
         canvas.width = videoElement.videoWidth;
         canvas.height = videoElement.videoHeight;
         context.drawImage(videoElement, 0, 0);
 
-        // Obtener datos del usuario
-        const fullName = userData.fullName || 'Nombre No Disponible';
-        const cedula = userData.cedula || 'Cédula No Disponible';
-        const username = userData.username || 'Usuario Desconocido';
-        const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
-
-        // Obtener fecha, hora y ubicación actual
+        // Obtener la ubicación
+        const lat = document.getElementById('latitude')?.textContent || 'Desconocido';
+        const lng = document.getElementById('longitude')?.textContent || 'Desconocido';
         const dateTime = new Date().toLocaleString();
-        const lat = document.getElementById('latitude')?.textContent || 'No disponible';
-        const lng = document.getElementById('longitude')?.textContent || 'No disponible';
         const location = `Lat: ${lat}, Lng: ${lng}`;
 
-        // Agregar texto sobre la imagen con los datos del usuario
+        // Dibujar texto en la imagen
         context.font = '20px Arial';
         context.fillStyle = 'white';
         context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
@@ -305,17 +334,18 @@ async function capturePhoto() {
         context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
         context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
 
-        // Mostrar la imagen capturada
-        document.getElementById("capturedPhoto").src = canvas.toDataURL("image/png");
+        // Guardar la imagen en el elemento img
+        const imageData = canvas.toDataURL("image/png");
+        document.getElementById("capturedPhoto").src = imageData;
 
         // Detener la cámara
         stream.getTracks().forEach(track => track.stop());
+
     } catch (error) {
-        console.error("Error al capturar la foto:", error);
-        alert("Hubo un problema al capturar la foto. Revisa la consola para más detalles.");
+        console.error("Error al capturar la foto:", error.message);
     }
-        }
-        
+}
+
 
         async function handleRegister(endpoint) {
             try {
