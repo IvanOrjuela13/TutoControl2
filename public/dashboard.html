@@ -150,13 +150,11 @@
         
     <div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-    <img id="capturedPhoto" src="" alt="Foto no disponible" onerror="mostrarError()" />
-    <p id="errorMsg" style="display: none; color: red;">❌ No se pudo cargar la imagen</p>
+            <img id="capturedPhoto"  src="" alt="Foto no disponible" />
 </div> 
-
 <script>
     function mostrarError() {
-        document.getElementById("errorMsg").style.display = "block"; // Muestra el mensaje de error
+        document.getElementById("errorMsg").style.display = "block";
     }
 </script>
 
