@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+public/dashboard.html <!DOCTYPE html>
 
 <html lang="es">
 <head>
@@ -207,158 +207,46 @@
             return distance <= maxDistance;
         }
     
-    async function fetchUserData() {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("No hay token disponible");
-            return null;
-        }
+    async function capturePhoto() {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    videoElement.srcObject = stream;
+    videoElement.play();
 
-        const response = await fetch(`/api/auth/user`, {  // Cambia la ruta según tu backend
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
+    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
 
-        if (!response.ok) {
-            throw new Error('No se pudieron obtener los datos del usuario');
-        }
+    context.drawImage(videoElement, 0, 0);
 
-        const data = await response.json();
-        return data; // Retorna los datos directamente
-    } catch (error) {
-        console.error("Error al obtener los datos del usuario:", error.message);
-        return null;
-    }
+    // Obtener datos desde localStorage
+    const username = localStorage.getItem('username') || 'Usuario Desconocido';
+    const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
+    const fullName = localStorage.getItem('fullName') || 'Nombre No Disponible';
+    const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
+
+    // Obtener fecha, hora y ubicación actual
+    const dateTime = new Date().toLocaleString();
+    const lat = document.getElementById('latitude').textContent;
+    const lng = document.getElementById('longitude').textContent;
+    const location = `Lat: ${lat}, Lng: ${lng}`;
+
+    // Agregar texto sobre la imagen con los datos del usuario
+    context.font = '20px Arial';
+    context.fillStyle = 'white';
+    context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
+    context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
+    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
+    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+
+    const imageData = canvas.toDataURL("image/png");
+
+    document.getElementById("capturedPhoto").src = imageData;
+    stream.getTracks().forEach(track => track.stop());
 }
-
-async function fetchUserData() {
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("No hay token disponible");
-            return null;
-        }
-
-        const response = await fetch(`/api/auth/user`, { // Asegúrate de que esta ruta sea la correcta
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('No se pudieron obtener los datos del usuario');
-        }
-
-        return await response.json(); // Retorna los datos directamente
-    } catch (error) {
-        console.error("Error al obtener los datos del usuario:", error.message);
-        return null;
-    }
-}
-
-async function fetchUserData() {
-    try {
-        const username = localStorage.getItem('username');
-        const token = localStorage.getItem('token'); 
-
-        if (!username || !token) {
-            throw new Error("Usuario no autenticado");
-        }
-
-        const response = await fetch(`/api/auth/user/${username}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error("No se pudieron obtener los datos del usuario");
-        }
-
-        const data = await response.json();
-        
-        // Guardar los datos actualizados en localStorage
-        localStorage.setItem('fullName', data.fullName);
-        localStorage.setItem('cedula', data.cedula);
-        localStorage.setItem('area', data.area);
-        
-        return data;
-    } catch (error) {
-        console.error("Error al obtener los datos del usuario:", error.message);
-        return null;
-    }
-}
-
-async function fetchUserData() {
-    try {
-        const username = localStorage.getItem('username');
-        const token = localStorage.getItem('token');
-
-        if (!username || !token) {
-            throw new Error("Usuario no autenticado");
-        }
-
-        const response = await fetch(`/api/auth/user/${username}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error("No se pudieron obtener los datos del usuario");
-        }
-
-        const data = await response.json();
-
-        localStorage.setItem('fullName', data.fullName);
-        localStorage.setItem('cedula', data.cedula);
-        localStorage.setItem('area', data.area);
-
-        return data;
-    } catch (error) {
-        console.error("Error al obtener los datos del usuario:", error.message);
-        return null;
-    }
-}
-
-async function captureTest() {
-    try {
-        const videoElement = document.getElementById("videoElement");
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        // Iniciar la cámara
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoElement.srcObject = stream;
-        await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-
-        // Configurar tamaño del canvas
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        
-        // Dibujar la imagen del video en el canvas
-        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-        // Obtener la imagen en base64 y mostrarla
-        const imageData = canvas.toDataURL("image/png");
-        document.getElementById("capturedPhoto").src = imageData;
-
-        // Detener la cámara
-        stream.getTracks().forEach(track => track.stop());
-
-        console.log("Foto capturada correctamente");
-    } catch (error) {
-        console.error("Error al capturar la foto:", error.message);
-    }
-}
-
-
 
         async function handleRegister(endpoint) {
             try {
