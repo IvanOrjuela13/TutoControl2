@@ -18,8 +18,8 @@
                     <div class="card-body">
                         <form id="loginForm">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Nombre de Usuario</label>
-                                <input type="text" class="form-control" id="username" placeholder="Ingresa tu usuario" required>
+                                <label for="cedula" class="form-label">Número de Cédula</label>
+                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu número de cédula" required>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
@@ -49,11 +49,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Ingresa tu usuario y una nueva contraseña.</p>
+                    <p>Ingresa tu número de cédula y una nueva contraseña.</p>
                     <form id="resetPasswordForm">
                         <div class="mb-3">
-                            <label for="resetUsername" class="form-label">Usuario</label>
-                            <input type="text" class="form-control" id="resetUsername" placeholder="Ingresa tu usuario" required>
+                            <label for="resetCedula" class="form-label">Número de Cédula</label>
+                            <input type="text" class="form-control" id="resetCedula" placeholder="Ingresa tu número de cédula" required>
                         </div>
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">Nueva Contraseña</label>
@@ -75,7 +75,7 @@
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const cedula = document.getElementById('cedula').value;  // Cambiado a cédula
             const password = document.getElementById('password').value;
 
             try {
@@ -84,14 +84,14 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password, deviceID }),
+                    body: JSON.stringify({ cedula, password, deviceID }),  // Cambiado a cédula
                 });
 
                 const data = await response.json();
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
-                    localStorage.setItem('username', username);
+                    localStorage.setItem('cedula', cedula);  // Cambiado a cédula
                     localStorage.setItem('token', data.token);
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
                     setTimeout(() => window.location.href = 'dashboard.html', 1000);
@@ -108,7 +108,7 @@
         document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const resetUsername = document.getElementById('resetUsername').value;
+            const resetCedula = document.getElementById('resetCedula').value;  // Cambiado a cédula
             const newPassword = document.getElementById('newPassword').value;
 
             try {
@@ -117,7 +117,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username: resetUsername, newPassword }),
+                    body: JSON.stringify({ cedula: resetCedula, newPassword }),  // Cambiado a cédula
                 });
 
                 const data = await response.json();
