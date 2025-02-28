@@ -148,16 +148,19 @@
     <p id="timestamp" style="font-size: 14px; color: #636e72;">📅 Fecha y Hora: <span id="dateTime">-</span></p>
 </div>
         
-    
-<div id="photo">
+    <div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-            <img id="capturedPhoto"  src="" alt="Foto no disponible" />
+    <img id="capturedPhoto" src="" alt="Foto no disponible" onerror="mostrarError()" />
+    <p id="errorMsg" style="display: none; color: red;">❌ No se pudo cargar la imagen</p>
 </div> 
+
 <script>
     function mostrarError() {
-        document.getElementById("errorMsg").style.display = "block";
+        document.getElementById("errorMsg").style.display = "block"; // Muestra el mensaje de error
     }
 </script>
+
+
 
 
         <div id="message" class="mt-3"></div>
