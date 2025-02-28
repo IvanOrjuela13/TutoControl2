@@ -50,13 +50,6 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="username" class="form-label">Nombre de Usuario</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
-                                <input type="text" class="form-control" id="username" placeholder="Ingresa tu usuario" required maxlength="20">
-                            </div>
-                        </div>
-                        <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
@@ -87,7 +80,6 @@
             const fullName = document.getElementById('fullName').value;
             const cedula = document.getElementById('cedula').value;
             const area = document.getElementById('area').value;
-            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -106,7 +98,7 @@
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullName, cedula, area, username, password, deviceID }),
+                    body: JSON.stringify({ fullName, cedula, area, password, confirmPassword, deviceID }),
                 });
 
                 const data = await response.json();
