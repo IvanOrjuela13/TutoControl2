@@ -230,14 +230,14 @@
     const lng = document.getElementById('longitude').textContent;
     const location = `Lat: ${lat}, Lng: ${lng}`;
 
-    // Agregar texto sobre la imagen con los datos del usuario
-const startY = canvas.height - 60;  // Posición de inicio en Y para la primera línea
-const lineSpacing = 30;  // Espacio entre cada línea de texto
+     // Establecer la posición de inicio más arriba y ajustar el espaciado
+const startY = canvas.height - 120;  // Posición inicial más arriba, alejada del borde inferior
+const lineSpacing = 25;  // Reducir el espacio entre líneas de texto
 
 context.font = '20px Arial';
 context.fillStyle = 'white';
 
-// Imprimir las líneas con un espaciado entre ellas
+// Imprimir las líneas con el nuevo espaciado y posición
 context.fillText(`ID: ${deviceID}`, 10, startY);
 context.fillText(`Cédula: ${cedula}`, 10, startY + lineSpacing);
 context.fillText(`Fecha: ${dateTime}`, 10, startY + 2 * lineSpacing);
