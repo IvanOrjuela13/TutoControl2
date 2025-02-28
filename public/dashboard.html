@@ -148,37 +148,11 @@
     <p id="timestamp" style="font-size: 14px; color: #636e72;">📅 Fecha y Hora: <span id="dateTime">-</span></p>
 </div>
         
-    <div id="photo">
+    
+<div id="photo">
     <h5 id="photoTitle">📸 Foto Capturada:</h5>
-    <img id="capturedPhoto" src="#" alt="Foto no disponible" onerror="this.style.display='none'; document.getElementById('photo').classList.add('no-image');"/>
+            <img id="capturedPhoto"  src="#" alt="Foto no disponible" />
 </div>
-
-<style>
-    #photo {
-        width: 100%;
-        height: 200px;
-        background-color: #222222; /* Color de fondo oscuro */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-    }
-
-    /* Si la imagen no carga, se muestra un icono */
-    .no-image::after {
-        content: "📷"; /* Icono de cámara */
-        font-size: 50px;
-        color: #aaa; /* Color gris claro */
-    }
-
-    #capturedPhoto {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-</style>
-
 
         
 <script>
