@@ -231,12 +231,18 @@
     const location = `Lat: ${lat}, Lng: ${lng}`;
 
     // Agregar texto sobre la imagen con los datos del usuario
-    context.font = '20px Arial';
-    context.fillStyle = 'white';
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-    context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+const startY = canvas.height - 60;  // Posición de inicio en Y para la primera línea
+const lineSpacing = 30;  // Espacio entre cada línea de texto
+
+context.font = '20px Arial';
+context.fillStyle = 'white';
+
+// Imprimir las líneas con un espaciado entre ellas
+context.fillText(`ID: ${deviceID}`, 10, startY);
+context.fillText(`Cédula: ${cedula}`, 10, startY + lineSpacing);
+context.fillText(`Fecha: ${dateTime}`, 10, startY + 2 * lineSpacing);
+context.fillText(`Ubicación: ${location}`, 10, startY + 3 * lineSpacing);
+
 
     const imageData = canvas.toDataURL("image/png");
 
