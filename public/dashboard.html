@@ -234,56 +234,88 @@
     }
 }
 
-async function capturePhoto() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    videoElement.srcObject = stream;
-    videoElement.play();
+async function fetchUserData() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error("No hay token disponible");
+            return null;
+        }
 
-    await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
+        const response = await fetch(`/api/auth/user`, { // Asegúrate de que esta ruta sea la correcta
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
-    context.drawImage(videoElement, 0, 0);
+        if (!response.ok) {
+            throw new Error('No se pudieron obtener los datos del usuario');
+        }
 
-    // Obtener datos del usuario en tiempo real
-    const userData = await fetchUserData();
-
-    if (!userData) {
-        console.error("No se pudieron obtener los datos del usuario.");
-        return;
+        return await response.json(); // Retorna los datos directamente
+    } catch (error) {
+        console.error("Error al obtener los datos del usuario:", error.message);
+        return null;
     }
-
-    // Obtener los datos del usuario directamente sin localStorage
-    const fullName = userData.fullName || 'Nombre No Disponible';
-    const cedula = userData.cedula || 'Cédula No Disponible';
-    const username = userData.username || 'Usuario Desconocido';
-    const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
-
-    // Obtener fecha, hora y ubicación actual
-    const dateTime = new Date().toLocaleString();
-    const lat = document.getElementById('latitude').textContent;
-    const lng = document.getElementById('longitude').textContent;
-    const location = `Lat: ${lat}, Lng: ${lng}`;
-
-    // Agregar texto sobre la imagen con los datos del usuario
-    context.font = '20px Arial';
-    context.fillStyle = 'white';
-    context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
-    context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
-    context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
-    context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
-    context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
-    context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
-
-    const imageData = canvas.toDataURL("image/png");
-
-    document.getElementById("capturedPhoto").src = imageData;
-    stream.getTracks().forEach(track => track.stop());
 }
 
-}
+async function capturePhoto() {
+    try {
+        // Obtener datos del usuario en tiempo real
+        const userData = await fetchUserData();
+        if (!userData) {
+            alert("Error al obtener los datos del usuario. Inténtalo nuevamente.");
+            return;
+        }
+
+        const videoElement = document.getElementById("videoElement");
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        // Activar la cámara
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoElement.srcObject = stream;
+        await new Promise(resolve => videoElement.onloadedmetadata = resolve);
+
+        // Configurar tamaño del canvas
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        context.drawImage(videoElement, 0, 0);
+
+        // Obtener datos del usuario
+        const fullName = userData.fullName || 'Nombre No Disponible';
+        const cedula = userData.cedula || 'Cédula No Disponible';
+        const username = userData.username || 'Usuario Desconocido';
+        const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
+
+        // Obtener fecha, hora y ubicación actual
+        const dateTime = new Date().toLocaleString();
+        const lat = document.getElementById('latitude')?.textContent || 'No disponible';
+        const lng = document.getElementById('longitude')?.textContent || 'No disponible';
+        const location = `Lat: ${lat}, Lng: ${lng}`;
+
+        // Agregar texto sobre la imagen con los datos del usuario
+        context.font = '20px Arial';
+        context.fillStyle = 'white';
+        context.fillText(`Nombre: ${fullName}`, 10, canvas.height - 120);
+        context.fillText(`Cédula: ${cedula}`, 10, canvas.height - 100);
+        context.fillText(`Usuario: ${username}`, 10, canvas.height - 80);
+        context.fillText(`ID: ${deviceID}`, 10, canvas.height - 60);
+        context.fillText(`Fecha: ${dateTime}`, 10, canvas.height - 40);
+        context.fillText(`Ubicación: ${location}`, 10, canvas.height - 20);
+
+        // Mostrar la imagen capturada
+        document.getElementById("capturedPhoto").src = canvas.toDataURL("image/png");
+
+        // Detener la cámara
+        stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+        console.error("Error al capturar la foto:", error);
+        alert("Hubo un problema al capturar la foto. Revisa la consola para más detalles.");
+    }
+        }
+        
 
         async function handleRegister(endpoint) {
             try {
