@@ -68,13 +68,8 @@
     </div>
 
     <script>
-        // Generar o obtener el Device ID
-        const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
-        localStorage.setItem('deviceID', deviceID);
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const cedula = document.getElementById('cedula').value;
             const password = document.getElementById('password').value;
 
@@ -82,26 +77,46 @@
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ cedula, password, deviceID }),
+                    body: JSON.stringify({ cedula, password })
                 });
-
                 const data = await response.json();
-                const messageDiv = document.getElementById('message');
-
                 if (response.ok) {
-                    localStorage.setItem('cedula', cedula);
-                    localStorage.setItem('token', data.token);
-                    messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    // Redirigir a la página de registros o dashboard
-                    window.location.href = '/dashboard.html';
+                    document.getElementById('message').innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
                 } else {
-                    messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
+                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error(error);
                 document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+            }
+        });
+
+        // Restablecer contraseña
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cedula = document.getElementById('resetCedula').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cedula, newPassword })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById('resetMessage').innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+                    setTimeout(() => { window.location.reload(); }, 2000);
+                } else {
+                    document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
             }
         });
     </script>
