@@ -293,32 +293,33 @@ document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${user
     </script>
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        // Si no hay token, redirigir a login
-        window.location.href = "/login";
-    } else {
+        window.location.href = "/login"; // Si no hay token, redirigir
+        return;
+    }
+
+    try {
         // Verificar el token con el servidor
-        fetch("/api/auth/verify", {
+        const response = await fetch("/api/auth/verify", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Token inválido o expirado");
-            }
-        })
-        .catch(() => {
-            localStorage.removeItem("token"); // Borrar token inválido
-            window.location.href = "/login"; // Redirigir a login
         });
+
+        if (!response.ok) {
+            throw new Error("Token inválido o expirado");
+        }
+    } catch (error) {
+        localStorage.removeItem("token"); // Borrar token inválido
+        window.location.href = "/login"; // Redirigir a login
     }
 });
-    </script>
+</script>
+
     
 </body>
 </html>
