@@ -20,14 +20,9 @@ app.use(cors());
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Redirigir la raíz a /register
+// Redirigir la raíz a /login
 app.get('/', (req, res) => {
-    res.redirect('/register');
-});
-
-// Ruta para el archivo register.html
-app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+    res.redirect('/login');
 });
 
 // Ruta para el archivo login.html
@@ -35,9 +30,14 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Ruta para el archivo register.html
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
 // Rutas
 app.use('/api/auth', authRoutes);
-app.use('/api/registro', registroRoutes); // Usar la nueva ruta para registro
+app.use('/api/registro', registroRoutes); 
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
