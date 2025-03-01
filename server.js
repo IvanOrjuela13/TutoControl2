@@ -4,6 +4,7 @@ const authRoutes = require('./routes/auth');
 const registroRoutes = require('./routes/registro');
 const path = require('path');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
@@ -20,6 +21,23 @@ app.use(cors());
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware para verificar autenticación con JWT
+const verifyToken = (req, res, next) => {
+    const token = req.headers.authorization;
+    
+    if (!token) {
+        return res.redirect('/login'); // Redirigir si no hay token
+    }
+
+    try {
+        const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.redirect('/login'); // Redirigir si el token no es válido
+    }
+};
+
 // Redirigir la raíz a /login
 app.get('/', (req, res) => {
     res.redirect('/login');
@@ -35,9 +53,14 @@ app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
 });
 
-// Rutas
+// Ruta protegida para dashboard.html
+app.get('/dashboard.html', verifyToken, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// Rutas de autenticación y registros
 app.use('/api/auth', authRoutes);
-app.use('/api/registro', registroRoutes); 
+app.use('/api/registro', registroRoutes);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
