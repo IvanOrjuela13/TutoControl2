@@ -58,10 +58,23 @@ app.get("/register", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
-// Ruta protegida para dashboard.html
-app.get("/dashboard.html", verifyToken, (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+app.get("/dashboard.html", (req, res) => {
+    const token = req.headers.authorization;
+
+    if (!token) {
+        return res.redirect("/login"); // 🔹 Redirige si no hay token
+    }
+
+    try {
+        const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
+        req.user = decoded;
+        res.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0"); // 🔹 Evita caché
+        res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+    } catch (err) {
+        return res.redirect("/login"); // 🔹 Redirige si el token no es válido
+    }
 });
+
 
 // Rutas de autenticación y registros
 app.use("/api/auth", authRoutes);
