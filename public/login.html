@@ -68,12 +68,9 @@
     </div>
 
     <script>
-        // Regenerar el Device ID si no existe
-        let deviceID = localStorage.getItem('deviceID');
-        if (!deviceID) {
-            deviceID = 'device-' + Date.now();
-            localStorage.setItem('deviceID', deviceID);
-        }
+        // Generar o obtener el Device ID
+        const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
+        localStorage.setItem('deviceID', deviceID);
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -94,8 +91,10 @@
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
+                    localStorage.setItem('cedula', cedula);
                     localStorage.setItem('token', data.token);
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+                    // Redirigir a la página de registros o dashboard
                     window.location.href = '/dashboard.html';
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
