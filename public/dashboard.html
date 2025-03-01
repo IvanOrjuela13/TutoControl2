@@ -156,6 +156,35 @@
     <h5 id="photoTitle">📸 Evidencia En Progreso,No Se Mueva...</h5>
             <img id="capturedPhoto" />
 </div> 
+        
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "/login"; // 🔹 Redirige si no hay token
+    }
+
+    fetch("/api/auth/verify", {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            localStorage.removeItem("token"); // 🔹 Borra token si es inválido
+            window.location.href = "/login"; // 🔹 Redirige
+        }
+    })
+    .catch(() => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    });
+});
+</script>
+        
+        
 <script>
     function mostrarError() {
         document.getElementById("errorMsg").style.display = "block";
