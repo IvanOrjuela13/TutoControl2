@@ -68,7 +68,7 @@
     </div>
 
     <script>
-        // Generar o obtener el Device ID
+        // Generar o obtener el Device ID único por dispositivo
         const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
         localStorage.setItem('deviceID', deviceID);
 
@@ -94,8 +94,9 @@
                     localStorage.setItem('cedula', cedula);
                     localStorage.setItem('token', data.token);
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    // Redirigir a la página de registros o dashboard
-                    window.location.href = '/dashboard.html';
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html'; 
+                    }, 1000);
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
