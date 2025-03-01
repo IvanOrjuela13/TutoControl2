@@ -38,6 +38,11 @@ const verifyToken = (req, res, next) => {
     }
 };
 
+// Nueva ruta para verificar el token desde el frontend
+app.get("/api/auth/verify", verifyToken, (req, res) => {
+    res.json({ message: "Token válido" });
+});
+
 // Redirigir la raíz a /login
 app.get("/", (req, res) => {
     res.redirect("/login");
