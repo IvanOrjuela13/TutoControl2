@@ -20,15 +20,17 @@
                             <label for="fullName" class="form-label">Nombre Completo</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required>
+                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" maxlength="30" required>
                             </div>
+                            <small class="text-danger d-none" id="nameError">Solo se permiten letras (máx. 30 caracteres).</small>
                         </div>
                         <div class="mb-3">
                             <label for="cedula" class="form-label">Cédula</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
+                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" maxlength="10" required>
                             </div>
+                            <small class="text-danger d-none" id="cedulaError">Solo se permiten números (máx. 10 caracteres).</small>
                         </div>
                         <div class="mb-3">
                             <label for="area" class="form-label">Área</label>
@@ -55,6 +57,7 @@
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="10">
                             </div>
+                            <small class="text-danger d-none" id="passwordError">Debe contener al menos una mayúscula y una minúscula.</small>
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
@@ -62,6 +65,7 @@
                                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
                                 <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" required maxlength="10">
                             </div>
+                            <small class="text-danger d-none" id="confirmPasswordError">Las contraseñas no coinciden.</small>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 btn-lg">Registrarse</button>
                     </form>
@@ -77,58 +81,66 @@
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const fullName = document.getElementById('fullName').value;
-            const cedula = document.getElementById('cedula').value;
+            const fullName = document.getElementById('fullName').value.trim();
+            const cedula = document.getElementById('cedula').value.trim();
             const area = document.getElementById('area').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            let deviceID = localStorage.getItem('deviceID');
-            if (!deviceID) {
-                deviceID = 'device-' + Date.now();
-                localStorage.setItem('deviceID', deviceID);
+
+            let valid = true;
+
+            // Validar Nombre Completo (solo letras, máx. 30 caracteres)
+            if (!/^[A-Za-z\s]{1,30}$/.test(fullName)) {
+                document.getElementById('nameError').classList.remove('d-none');
+                valid = false;
+            } else {
+                document.getElementById('nameError').classList.add('d-none');
             }
 
-            // Validación de cédula (solo números y máximo 10 caracteres)
-            if (!/^\d{7,10}$/.test(cedula)) {
-                alert('La cédula debe contener solo números y tener entre 7 y 10 dígitos.');
-                return;
+            // Validar Cédula (solo números, máx. 10 caracteres)
+            if (!/^\d{1,10}$/.test(cedula)) {
+                document.getElementById('cedulaError').classList.remove('d-none');
+                valid = false;
+            } else {
+                document.getElementById('cedulaError').classList.add('d-none');
             }
 
-            // Validación de contraseña (máximo 10 caracteres, al menos 1 mayúscula y 1 minúscula)
-            if (!/^(?=.*[a-z])(?=.*[A-Z]).{6,10}$/.test(password)) {
-                alert('La contraseña debe tener entre 6 y 10 caracteres, incluir al menos una mayúscula y una minúscula.');
-                return;
+            // Validar Contraseña (al menos una mayúscula y una minúscula, máx. 10 caracteres)
+            if (!/(?=.*[a-z])(?=.*[A-Z])/.test(password) || password.length > 10) {
+                document.getElementById('passwordError').classList.remove('d-none');
+                valid = false;
+            } else {
+                document.getElementById('passwordError').classList.add('d-none');
             }
 
+            // Validar confirmación de contraseña
             if (password !== confirmPassword) {
-                alert('Las contraseñas no coinciden.');
-                return;
+                document.getElementById('confirmPasswordError').classList.remove('d-none');
+                valid = false;
+            } else {
+                document.getElementById('confirmPasswordError').classList.add('d-none');
             }
+
+            if (!valid) return;
 
             try {
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullName, cedula, area, password, deviceID }),
+                    body: JSON.stringify({ fullName, cedula, area, password }),
                 });
 
                 const data = await response.json();
                 alert(data.msg);
 
                 if (response.ok) {
-                    window.location.href = "login.html"; 
+                    window.location.href = "login.html";
                 }
 
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error al registrar usuario');
             }
-        });
-
-        // Evitar que ingresen letras en el campo de cédula
-        document.getElementById('cedula').addEventListener('input', function () {
-            this.value = this.value.replace(/\D/g, '').slice(0, 10); // Solo números y máximo 10 caracteres
         });
     </script>
 
