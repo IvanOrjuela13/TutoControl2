@@ -2,9 +2,6 @@
 
 <html lang="es">
 <head>
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
@@ -156,35 +153,6 @@
     <h5 id="photoTitle">📸 Evidencia En Progreso,No Se Mueva...</h5>
             <img id="capturedPhoto" />
 </div> 
-        
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-        window.location.href = "/login"; // 🔹 Redirige si no hay token
-    }
-
-    fetch("/api/auth/verify", {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            localStorage.removeItem("token"); // 🔹 Borra token si es inválido
-            window.location.href = "/login"; // 🔹 Redirige
-        }
-    })
-    .catch(() => {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-    });
-});
-</script>
-        
-        
 <script>
     function mostrarError() {
         document.getElementById("errorMsg").style.display = "block";
@@ -325,33 +293,32 @@ document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${user
     </script>
 
     <script>
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        window.location.href = "/login"; // Si no hay token, redirigir
-        return;
-    }
-
-    try {
+        // Si no hay token, redirigir a login
+        window.location.href = "/login";
+    } else {
         // Verificar el token con el servidor
-        const response = await fetch("/api/auth/verify", {
+        fetch("/api/auth/verify", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`
             }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Token inválido o expirado");
+            }
+        })
+        .catch(() => {
+            localStorage.removeItem("token"); // Borrar token inválido
+            window.location.href = "/login"; // Redirigir a login
         });
-
-        if (!response.ok) {
-            throw new Error("Token inválido o expirado");
-        }
-    } catch (error) {
-        localStorage.removeItem("token"); // Borrar token inválido
-        window.location.href = "/login"; // Redirigir a login
     }
 });
-</script>
-
+    </script>
     
 </body>
 </html>
