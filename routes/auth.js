@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');  // Para generar un Device ID único
 const router = express.Router();
 
 // Ruta para restablecer la contraseña
@@ -14,7 +15,6 @@ router.post('/reset-password', async (req, res) => {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
 
-        // Encriptar la nueva contraseña antes de guardarla
         user.password = newPassword;
         await user.save();
 
@@ -26,12 +26,12 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// Ruta para el registro de usuarios
+// Ruta para el registro de usuarios (sin deviceID)
 router.post('/register', async (req, res) => {
-    const { fullName, cedula, area, password, deviceID } = req.body;
+    const { fullName, cedula, area, password } = req.body;
 
     try {
-        if (!fullName || !cedula || !area || !password || !deviceID) {
+        if (!fullName || !cedula || !area || !password) {
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
         }
 
@@ -40,17 +40,12 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
         }
 
-        const existingDevice = await User.findOne({ deviceID });
-        if (existingDevice) {
-            return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
-        }
-
         const newUser = new User({
             fullName,
             cedula,
             area,
             password,
-            deviceID
+            deviceID: null  // Se asignará en el login
         });
 
         await newUser.save();
@@ -73,20 +68,22 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Usuario no encontrado' });
         }
 
-        // Verificar la contraseña usando el método matchPassword
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
             return res.status(400).json({ msg: 'Contraseña incorrecta' });
         }
 
-        if (user.deviceID !== deviceID) {
+        if (!user.deviceID) {
+            // Si el usuario no tiene un deviceID registrado, asignarle uno nuevo
+            user.deviceID = deviceID || uuidv4();  // Si no se envía, se genera uno único
+            await user.save();
+        } else if (user.deviceID !== deviceID) {
             return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
         }
 
-        const payload = { userId: user._id };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        res.json({ token, msg: 'Inicio de sesión exitoso' });
+        res.json({ token, deviceID: user.deviceID, msg: 'Inicio de sesión exitoso' });
 
     } catch (error) {
         console.error("Error en el servidor:", error.message);
