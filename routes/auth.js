@@ -1,140 +1,115 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de Usuario</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-</head>
-<body class="bg-light">
+const express = require('express');
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const router = express.Router();
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header text-center bg-primary text-white">
-                        <h3>Iniciar Sesión</h3>
-                    </div>
-                    <div class="card-body">
-                        <form id="loginForm">
-                            <div class="mb-3">
-                                <label for="cedula" class="form-label">Cédula</label>
-                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
-                        </form>
-                        <div id="message" class="mt-3"></div>
-                        <div class="text-center mt-2">
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">¿Olvidaste tu contraseña?</a>
-                        </div>
-                    </div>
-                    <div class="card-footer text-center">
-                        <p>¿No tienes una cuenta? <a href="register.html">Regístrate aquí</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+// Ruta para restablecer la contraseña
+router.post('/reset-password', async (req, res) => {
+    const { cedula, newPassword } = req.body;
 
-    <!-- Modal para restablecer contraseña -->
-    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="resetPasswordModalLabel">Restablecer Contraseña</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Ingresa tu cédula y una nueva contraseña.</p>
-                    <form id="resetPasswordForm">
-                        <div class="mb-3">
-                            <label for="resetCedula" class="form-label">Cédula</label>
-                            <input type="text" class="form-control" id="resetCedula" placeholder="Ingresa tu cédula" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="newPassword" placeholder="Ingresa tu nueva contraseña" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Actualizar Contraseña</button>
-                    </form>
-                    <div id="resetMessage" class="mt-3"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    try {
+        const user = await User.findOne({ cedula });
 
-    <script>
-        // Generar o obtener el Device ID
-        const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
-        localStorage.setItem('deviceID', deviceID);
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Encriptar la nueva contraseña antes de guardarla
+        user.password = newPassword;
+        await user.save();
 
-            const cedula = document.getElementById('cedula').value;
-            const password = document.getElementById('password').value;
+        res.json({ msg: 'Contraseña actualizada exitosamente' });
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ cedula, password, deviceID }),
-                });
+    } catch (error) {
+        console.error("Error al actualizar la contraseña:", error.message);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+});
 
-                const data = await response.json();
-                const messageDiv = document.getElementById('message');
+// Ruta para el registro de usuarios
+router.post('/register', async (req, res) => {
+    const { fullName, cedula, area, password, deviceID } = req.body;
 
-                if (response.ok) {
-                    localStorage.setItem('cedula', cedula);
-                    localStorage.setItem('token', data.token);
-                    messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    // Redirigir a la página de registros o dashboard
-                    window.location.href = '/dashboard.html';
-                } else {
-                    messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
-            }
+    try {
+        if (!fullName || !cedula || !area || !password || !deviceID) {
+            return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+        }
+
+        const existingUser = await User.findOne({ cedula });
+        if (existingUser) {
+            return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
+        }
+
+        const existingDevice = await User.findOne({ deviceID });
+        if (existingDevice) {
+            return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
+        }
+
+        const newUser = new User({
+            fullName,
+            cedula,
+            area,
+            password,
+            deviceID
         });
 
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        await newUser.save();
+        res.status(201).json({ msg: 'Usuario creado exitosamente' });
 
-            const cedula = document.getElementById('resetCedula').value;
-            const newPassword = document.getElementById('newPassword').value;
+    } catch (error) {
+        console.error("Error al registrar usuario:", error);
+        res.status(500).json({ msg: 'Error en el servidor' });
+    }
+});
 
-            try {
-                const response = await fetch('/api/auth/reset-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ cedula, newPassword }),
-                });
+// Ruta para el inicio de sesión
+router.post('/login', async (req, res) => {
+    const { cedula, password, deviceID } = req.body;
 
-                const data = await response.json();
-                const resetMessageDiv = document.getElementById('resetMessage');
+    try {
+        let user = await User.findOne({ cedula });
 
-                if (response.ok) {
-                    resetMessageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                } else {
-                    resetMessageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
-            }
-        });
-    </script>
+        if (!user) {
+            return res.status(400).json({ msg: 'Usuario no encontrado' });
+        }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        // Verificar la contraseña usando el método matchPassword
+        const isMatch = await user.matchPassword(password);
+        if (!isMatch) {
+            return res.status(400).json({ msg: 'Contraseña incorrecta' });
+        }
+
+        if (user.deviceID !== deviceID) {
+            return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
+        }
+
+        const payload = { userId: user._id };
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        res.json({ token, msg: 'Inicio de sesión exitoso' });
+
+    } catch (error) {
+        console.error("Error en el servidor:", error.message);
+        res.status(500).send('Error en el servidor');
+    }
+});
+
+// Ruta para obtener el deviceID del usuario
+router.get('/user/:cedula', async (req, res) => {
+    const { cedula } = req.params;
+
+    try {
+        const user = await User.findOne({ cedula });
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
+
+        res.json({ deviceID: user.deviceID });
+
+    } catch (error) {
+        console.error("Error en el servidor:", error.message);
+        res.status(500).send('Error en el servidor');
+    }
+});
+
+module.exports = router;
