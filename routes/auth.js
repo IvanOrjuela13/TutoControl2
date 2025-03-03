@@ -9,7 +9,6 @@ router.post('/reset-password', async (req, res) => {
 
     try {
         const user = await User.findOne({ cedula });
-
         if (!user) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         }
@@ -19,7 +18,6 @@ router.post('/reset-password', async (req, res) => {
         await user.save();
 
         res.json({ msg: 'Contraseña actualizada exitosamente' });
-
     } catch (error) {
         console.error("Error al actualizar la contraseña:", error.message);
         res.status(500).json({ msg: 'Error en el servidor' });
@@ -37,12 +35,7 @@ router.post('/register', async (req, res) => {
 
         const existingUser = await User.findOne({ cedula });
         if (existingUser) {
-            return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
-        }
-
-        const existingDevice = await User.findOne({ deviceID });
-        if (existingDevice) {
-            return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
+            return res.status(400).json({ msg: 'Este usuario ya está registrado y no puede usar otro dispositivo' });
         }
 
         const newUser = new User({
@@ -55,7 +48,6 @@ router.post('/register', async (req, res) => {
 
         await newUser.save();
         res.status(201).json({ msg: 'Usuario creado exitosamente' });
-
     } catch (error) {
         console.error("Error al registrar usuario:", error);
         res.status(500).json({ msg: 'Error en el servidor' });
@@ -68,7 +60,6 @@ router.post('/login', async (req, res) => {
 
     try {
         let user = await User.findOne({ cedula });
-
         if (!user) {
             return res.status(400).json({ msg: 'Usuario no encontrado' });
         }
@@ -80,14 +71,13 @@ router.post('/login', async (req, res) => {
         }
 
         if (user.deviceID !== deviceID) {
-            return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
+            return res.status(403).json({ msg: 'Este usuario solo puede acceder desde su dispositivo registrado' });
         }
 
         const payload = { userId: user._id };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.json({ token, msg: 'Inicio de sesión exitoso' });
-
     } catch (error) {
         console.error("Error en el servidor:", error.message);
         res.status(500).send('Error en el servidor');
@@ -105,7 +95,6 @@ router.get('/user/:cedula', async (req, res) => {
         }
 
         res.json({ deviceID: user.deviceID });
-
     } catch (error) {
         console.error("Error en el servidor:", error.message);
         res.status(500).send('Error en el servidor');
