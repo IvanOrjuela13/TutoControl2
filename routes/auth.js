@@ -26,12 +26,12 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// Ruta para el registro de usuarios
+// Ruta para el registro de usuarios (ACTUALIZADA)
 router.post('/register', async (req, res) => {
-    const { fullName, cedula, area, password, deviceID } = req.body;
+    const { fullName, cedula, area, password } = req.body;
 
     try {
-        if (!fullName || !cedula || !area || !password || !deviceID) {
+        if (!fullName || !cedula || !area || !password) {
             return res.status(400).json({ msg: "Todos los campos son obligatorios" });
         }
 
@@ -44,8 +44,7 @@ router.post('/register', async (req, res) => {
             fullName,
             cedula,
             area,
-            password,
-            deviceID
+            password
         });
 
         await newUser.save();
@@ -74,8 +73,13 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Contraseña incorrecta' });
         }
 
-        if (user.deviceID !== deviceID) {
+        if (user.deviceID && user.deviceID !== deviceID) {
             return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
+        }
+
+        if (!user.deviceID) {
+            user.deviceID = deviceID;
+            await user.save();
         }
 
         const payload = { userId: user._id };
