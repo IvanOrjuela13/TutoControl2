@@ -12,14 +12,19 @@ const app = express();
 // Conectar a la base de datos
 connectDB();
 
-// Middleware
+// Middleware para JSON
 app.use(express.json());
+
+// Middleware para CORS
 app.use(cors());
+
+// Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware para verificar autenticación con JWT
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
+
     if (!token) {
         return res.status(403).json({ message: "Acceso denegado" });
     }
@@ -33,18 +38,32 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-// Nueva ruta para verificar el token
+// Nueva ruta para verificar el token desde el frontend
 app.get("/api/auth/verify", verifyToken, (req, res) => {
     res.json({ message: "Token válido" });
 });
 
-// Rutas principales
-app.get("/", (req, res) => res.redirect("/login"));
-app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
-app.get("/register", (req, res) => res.sendFile(path.join(__dirname, "public", "register.html")));
-app.get("/dashboard.html", verifyToken, (req, res) => res.sendFile(path.join(__dirname, "public", "dashboard.html")));
+// Redirigir la raíz a /login
+app.get("/", (req, res) => {
+    res.redirect("/login");
+});
 
-// Rutas API
+// Ruta para el archivo login.html
+app.get("/login", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+// Ruta para el archivo register.html
+app.get("/register", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "register.html"));
+});
+
+// Ruta protegida para dashboard.html
+app.get("/dashboard.html", verifyToken, (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+// Rutas de autenticación y registros
 app.use("/api/auth", authRoutes);
 app.use("/api/registro", registroRoutes);
 
