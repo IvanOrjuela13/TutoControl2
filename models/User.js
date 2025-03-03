@@ -5,8 +5,7 @@ const UserSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     cedula: { type: String, required: true, unique: true },
     area: { type: String, required: true },
-    password: { type: String, required: true },
-    deviceID: { type: String, unique: true, sparse: true }  // Permite que sea nulo
+    password: { type: String, required: true }
 });
 
 // Método para comparar contraseñas
