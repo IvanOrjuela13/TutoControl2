@@ -91,10 +91,12 @@
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
-                    localStorage.setItem('cedula', cedula);
-                    localStorage.setItem('token', data.token);
+                    // Guardar en cookies en lugar de localStorage
+                    document.cookie = "cedula=" + encodeURIComponent(cedula) + "; path=/";
+                    document.cookie = "token=" + encodeURIComponent(data.token) + "; path=/";
+                    
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    // Redirigir a la página de registros o dashboard
+                    // Redirigir a la página de dashboard
                     window.location.href = '/dashboard.html';
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
