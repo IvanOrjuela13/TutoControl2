@@ -1,4 +1,4 @@
-routes/auth.js const express = require('express');
+const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
@@ -38,6 +38,11 @@ router.post('/register', async (req, res) => {
         const existingUser = await User.findOne({ cedula });
         if (existingUser) {
             return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
+        }
+
+        const existingDevice = await User.findOne({ deviceID });
+        if (existingDevice) {
+            return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
         }
 
         const newUser = new User({
