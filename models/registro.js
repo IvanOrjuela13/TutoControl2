@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const registroSchema = new mongoose.Schema({
     userId: { type: String, required: true },
     deviceID: { type: String, required: true },
+    cedula: { type: String, required: true }, // Campo agregado para la cédula
     ubicacion: {
         lat: { type: Number, required: true },
         lng: { type: Number, required: true }
