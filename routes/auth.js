@@ -40,11 +40,6 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ msg: 'Esta cédula ya está registrada' });
         }
 
-        const existingDevice = await User.findOne({ deviceID });
-        if (existingDevice) {
-            return res.status(400).json({ msg: 'Ya hay un usuario registrado en este dispositivo' });
-        }
-
         const newUser = new User({
             fullName,
             cedula,
