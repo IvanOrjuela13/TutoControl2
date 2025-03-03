@@ -1,3 +1,4 @@
+ste es el mio modificalo models/User.js 
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -5,7 +6,8 @@ const UserSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     cedula: { type: String, required: true, unique: true },
     area: { type: String, required: true },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    deviceID: { type: String, unique: true, sparse: true }  // Permite que sea nulo
 });
 
 // Método para comparar contraseñas
