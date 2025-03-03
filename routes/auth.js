@@ -1,3 +1,4 @@
+routes/auth.js 
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -31,9 +32,9 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Inicio de sesión (sin restricción de deviceID)
+// Inicio de sesión
 router.post('/login', async (req, res) => {
-    const { cedula, password } = req.body;
+    const { cedula, password, deviceID } = req.body;
 
     try {
         let user = await User.findOne({ cedula });
@@ -41,6 +42,17 @@ router.post('/login', async (req, res) => {
 
         const isMatch = await user.matchPassword(password);
         if (!isMatch) return res.status(400).json({ msg: 'Contraseña incorrecta' });
+
+        // Si el usuario ya tiene un deviceID, verifica que coincida
+        if (user.deviceID && user.deviceID !== deviceID) {
+            return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
+        }
+
+        // Si el usuario no tiene deviceID, se asigna el nuevo
+        if (!user.deviceID) {
+            user.deviceID = deviceID;
+            await user.save();
+        }
 
         const payload = { userId: user._id };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
