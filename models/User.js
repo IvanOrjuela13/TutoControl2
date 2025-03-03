@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
-    cedula: { type: String, required: true, unique: true },  // Usamos cedula como campo único
+    cedula: { type: String, required: true, unique: true },  // La cédula sigue siendo única
     area: { type: String, required: true },
-    password: { type: String, required: true },  // Ya no necesitamos 'username'
-    deviceID: { type: String, required: true, unique: true }
+    password: { type: String, required: true },
+    deviceID: { type: String, required: true }  // Se eliminó `unique: true`
 });
 
 // Método para comparar contraseñas
