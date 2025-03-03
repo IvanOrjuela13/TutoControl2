@@ -3,10 +3,10 @@ const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
-    cedula: { type: String, required: true, unique: true },  // Usamos cedula como campo único
+    cedula: { type: String, required: true, unique: true },
     area: { type: String, required: true },
-    password: { type: String, required: true },  // Ya no necesitamos 'username'
-    deviceID: { type: String, required: true, unique: true }
+    password: { type: String, required: true },
+    deviceID: { type: String, unique: true, sparse: true }  // Permite que sea nulo
 });
 
 // Método para comparar contraseñas
@@ -16,9 +16,7 @@ UserSchema.methods.matchPassword = async function (password) {
 
 // Middleware para encriptar la contraseña antes de guardar
 UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        return next();
-    }
+    if (!this.isModified('password')) return next();
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
