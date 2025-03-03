@@ -20,9 +20,8 @@
                             <label for="fullName" class="form-label">Nombre Completo</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required maxlength="30">
+                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required>
                             </div>
-                            <small class="text-muted">Solo se permiten letras y máximo 30 caracteres.</small>
                         </div>
                         <div class="mb-3">
                             <label for="cedula" class="form-label">Cédula</label>
@@ -54,15 +53,14 @@
                             <label for="password" class="form-label">Contraseña</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="10">
+                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="18">
                             </div>
-                            <small class="text-muted">Debe tener entre 6 y 10 caracteres, al menos una mayúscula y una minúscula.</small>
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" required maxlength="10">
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" required maxlength="18">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 btn-lg">Registrarse</button>
@@ -91,20 +89,8 @@
                 localStorage.setItem('deviceID', deviceID);
             }
 
-            // Validación de cédula (solo números y máximo 10 caracteres)
-            if (!/^\d{7,10}$/.test(cedula)) {
-                alert('La cédula debe contener solo números y tener entre 7 y 10 dígitos.');
-                return;
-            }
-
-            // Validación de contraseña (máximo 10 caracteres, al menos 1 mayúscula y 1 minúscula)
-            if (!/^(?=.*[a-z])(?=.*[A-Z]).{6,10}$/.test(password)) {
-                alert('La contraseña debe tener entre 6 y 10 caracteres, incluir al menos una mayúscula y una minúscula.');
-                return;
-            }
-
             if (password !== confirmPassword) {
-                alert('Las contraseñas no coinciden.');
+                alert('Las contraseñas no coinciden');
                 return;
             }
 
@@ -126,16 +112,6 @@
                 console.error('Error:', error);
                 alert('Error al registrar usuario');
             }
-        });
-
-        // Evitar números y convertir a minúsculas en el campo de nombre
-        document.getElementById('fullName').addEventListener('input', function () {
-            this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').toLowerCase().slice(0, 30);
-        });
-
-        // Evitar que ingresen letras en el campo de cédula
-        document.getElementById('cedula').addEventListener('input', function () {
-            this.value = this.value.replace(/\D/g, '').slice(0, 10);
         });
     </script>
 
