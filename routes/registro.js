@@ -5,7 +5,8 @@ const router = express.Router();
 
 // Ruta para registrar entrada
 router.post('/entrada', async (req, res) => {
-    const { userId, deviceID, ubicacion } = req.body;
+    // Incluimos "cedula" en la desestructuración
+    const { userId, deviceID, cedula, ubicacion } = req.body;
 
     try {
         // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
@@ -14,6 +15,7 @@ router.post('/entrada', async (req, res) => {
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
+            cedula, // Guardamos la cédula
             ubicacion,
             fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
             tipo: 'entrada'
@@ -28,7 +30,8 @@ router.post('/entrada', async (req, res) => {
 
 // Ruta para registrar salida
 router.post('/salida', async (req, res) => {
-    const { userId, deviceID, ubicacion } = req.body;
+    // Incluimos "cedula" en la desestructuración
+    const { userId, deviceID, cedula, ubicacion } = req.body;
 
     try {
         // Establece la fecha y hora actual en la zona horaria de Bogotá y ajusta la conversión a UTC
@@ -37,6 +40,7 @@ router.post('/salida', async (req, res) => {
         const nuevoRegistro = new Registro({
             userId,
             deviceID,
+            cedula, // Guardamos la cédula
             ubicacion,
             fecha: fechaLocal.toDate(), // Usa la fecha ajustada en Bogotá
             tipo: 'salida'
@@ -49,4 +53,4 @@ router.post('/salida', async (req, res) => {
     }
 });
 
-module.exports = router; 
+module.exports = router;
