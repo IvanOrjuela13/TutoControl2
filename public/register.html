@@ -1,11 +1,10 @@
-public/register.html <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Usuario</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css"> <!-- 🔧 FIX -->
 </head>
 <body class="bg-light">
 
@@ -92,12 +91,13 @@ public/register.html <!DOCTYPE html>
                 localStorage.setItem('deviceID', deviceID);
             }
 
-            // Validaciones
+            // Validación de cédula (solo números y máximo 10 caracteres)
             if (!/^\d{7,10}$/.test(cedula)) {
                 alert('La cédula debe contener solo números y tener entre 7 y 10 dígitos.');
                 return;
             }
 
+            // Validación de contraseña (máximo 10 caracteres, al menos 1 mayúscula y 1 minúscula)
             if (!/^(?=.*[a-z])(?=.*[A-Z]).{6,10}$/.test(password)) {
                 alert('La contraseña debe tener entre 6 y 10 caracteres, incluir al menos una mayúscula y una minúscula.');
                 return;
@@ -116,17 +116,15 @@ public/register.html <!DOCTYPE html>
                 });
 
                 const data = await response.json();
+                alert(data.msg);
 
-                if (!response.ok) {
-                    throw new Error(data.msg || 'Error al registrar usuario');
+                if (response.ok) {
+                    window.location.href = "login.html"; 
                 }
 
-                alert('Registro exitoso');
-                window.location.href = "login.html"; 
-
             } catch (error) {
-                console.error('Error al registrar usuario:', error);
-                alert(error.message);
+                console.error('Error:', error);
+                alert('Error al registrar usuario');
             }
         });
 
@@ -141,5 +139,6 @@ public/register.html <!DOCTYPE html>
         });
     </script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.3/font/bootstrap-icons.min.css"></script>
 </body>
 </html>
