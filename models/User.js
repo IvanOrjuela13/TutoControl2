@@ -6,7 +6,7 @@ const UserSchema = new mongoose.Schema({
     cedula: { type: String, required: true, unique: true },  // La cédula sigue siendo única
     area: { type: String, required: true },
     password: { type: String, required: true },
-    deviceID: { type: String, required: true }  // Se eliminó `unique: true`
+    deviceID: { type: String, required: false }  // Ahora no es obligatorio
 });
 
 // Método para comparar contraseñas
