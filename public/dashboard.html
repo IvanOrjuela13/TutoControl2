@@ -291,5 +291,34 @@ context.fillText(`Ubicación: ${location}`, 10, startY + 3 * lineSpacing);
 const username = localStorage.getItem('username') || 'Usuario';
 document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${username}! Listo para marcar tu registro con estilo. 🚀`;
     </script>
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        // Si no hay token, redirigir a login
+        window.location.href = "/login";
+    } else {
+        // Verificar el token con el servidor
+        fetch("/api/auth/verify", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Token inválido o expirado");
+            }
+        })
+        .catch(() => {
+            localStorage.removeItem("token"); // Borrar token inválido
+            window.location.href = "/login"; // Redirigir a login
+        });
+    }
+});
+    </script>
+    
 </body>
 </html>
