@@ -305,10 +305,8 @@
 
     document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
     document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
+    
     document.getElementById('logoutBtn').addEventListener('click', () => {
-      // Mostrar mensaje de cierre de sesión
-      document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
-      
       // Borrar datos en localStorage y cookies
       localStorage.removeItem("token");
       localStorage.removeItem("username");
@@ -318,11 +316,9 @@
       document.cookie = "username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       document.cookie = "cedula=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
       document.cookie = "deviceID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-
-      // Redirigir a login
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 1000);
+      
+      // Redirigir inmediatamente a login
+      window.location.href = 'login.html';
     });
 
     document.addEventListener("DOMContentLoaded", function () {
