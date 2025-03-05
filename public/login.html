@@ -1,4 +1,4 @@
-public/login.html <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -68,6 +68,33 @@ public/login.html <!DOCTYPE html>
     </div>
 
     <script>
+        // Verificación de la sesión cuando se carga la página
+        document.addEventListener("DOMContentLoaded", function () {
+            const token = localStorage.getItem("token");  // Obtener el token desde localStorage
+            
+            if (token) {
+                // Si el token está presente, puede estar caducado, por lo que verificamos con el servidor
+                fetch("/api/auth/verify", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Token inválido o expirado");
+                    }
+                    // Si el token es válido, redirige al dashboard o página de registros
+                    window.location.href = "/dashboard.html";
+                })
+                .catch(() => {
+                    // Si el token es inválido o ha caducado, lo eliminamos y redirigimos al login
+                    localStorage.removeItem("token");
+                    window.location.href = "/login.html";
+                });
+            }
+        });
+
         // Generar o obtener el Device ID
         const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
         localStorage.setItem('deviceID', deviceID);
@@ -102,35 +129,6 @@ public/login.html <!DOCTYPE html>
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
-            }
-        });
-
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const cedula = document.getElementById('resetCedula').value;
-            const newPassword = document.getElementById('newPassword').value;
-
-            try {
-                const response = await fetch('/api/auth/reset-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ cedula, newPassword }),
-                });
-
-                const data = await response.json();
-                const resetMessageDiv = document.getElementById('resetMessage');
-
-                if (response.ok) {
-                    resetMessageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                } else {
-                    resetMessageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
             }
         });
     </script>
