@@ -68,9 +68,35 @@
     </div>
 
     <script>
-        // Generar o obtener el Device ID
-        const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
-        localStorage.setItem('deviceID', deviceID);
+        // Función para establecer una cookie con duración de 360 días
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000)); // Días en milisegundos
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + value + "; path=/" + expires;
+        }
+
+        // Función para obtener una cookie
+        function getCookie(name) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + "=")) {
+                    return cookie.substring(name.length + 1);
+                }
+            }
+            return null;
+        }
+
+        // Generar o recuperar el Device ID usando cookies con 360 días de duración
+        let deviceID = getCookie('deviceID');
+        if (!deviceID) {
+            deviceID = 'device-' + Date.now();
+            setCookie('deviceID', deviceID, 360);
+        }
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -91,11 +117,11 @@
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
-                    localStorage.setItem('cedula', cedula);
-                    localStorage.setItem('token', data.token);
+                    setCookie('cedula', cedula, 360); // Guardar cédula por 360 días
+                    setCookie('token', data.token, 360); // Guardar token por 360 días
+
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    // Redirigir a la página de registros o dashboard
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/dashboard.html'; // Redirigir
                 } else {
                     messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
