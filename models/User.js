@@ -5,8 +5,8 @@ const UserSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     cedula: { type: String, required: true, unique: true },  // Usamos cedula como campo único
     area: { type: String, required: true },
-    password: { type: String, required: true },
-    deviceID: { type: String, required: true, unique: true }  // El Device ID será único
+    password: { type: String, required: true },  // Ya no necesitamos 'username'
+    deviceID: { type: String, required: true, unique: true }
 });
 
 // Método para comparar contraseñas
