@@ -90,13 +90,14 @@
       return null;
     }
 
-    // Recuperar el Device ID del localStorage o de las cookies
+    // Recuperar el deviceID del localStorage o de las cookies; si no existe, se crea uno nuevo.
     let deviceID = localStorage.getItem('deviceID') || getCookie('deviceID');
     if (!deviceID) {
       deviceID = 'device-' + Date.now();
       localStorage.setItem('deviceID', deviceID); 
       setCookie('deviceID', deviceID, 360);
     }
+    console.log("deviceID que se envía:", deviceID);
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -123,7 +124,7 @@
           setCookie('cedula', cedula, 360);
           setCookie('token', data.token, 360);
 
-          // Nuevo: almacenar "username" (usando el valor retornado por el API o usando la cédula como fallback)
+          // Almacenar "username" (usando el valor retornado por el API o la cédula como fallback)
           if (data.username) {
             localStorage.setItem('username', data.username);
             setCookie('username', data.username, 360);
