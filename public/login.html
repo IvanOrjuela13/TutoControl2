@@ -94,6 +94,7 @@
     // Manejo del formulario de inicio de sesión
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const cedula = document.getElementById('cedula').value;
       const password = document.getElementById('password').value;
 
@@ -110,11 +111,11 @@
         const messageDiv = document.getElementById('message');
 
         if (response.ok) {
-          // Guardar token y cédula en cookies (por 7 días, por ejemplo)
+          // Guardar token y cédula en cookies (por 7 días)
           setCookie('token', data.token, 7);
           setCookie('cedula', cedula, 7);
           messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-          // Redirigir a la página de dashboard
+          // Redirigir a dashboard
           window.location.href = '/dashboard.html';
         } else {
           messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
@@ -128,6 +129,7 @@
     // Manejo del formulario de restablecimiento de contraseña
     document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const cedula = document.getElementById('resetCedula').value;
       const newPassword = document.getElementById('newPassword').value;
 
