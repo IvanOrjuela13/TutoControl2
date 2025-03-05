@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+public/login.html <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -24,11 +24,6 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
                                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
-                            </div>
-                            <div class="mb-3" id="deviceIDSection">
-                                <label for="recoveryDeviceID" class="form-label">Iniciar sesión con Device ID</label>
-                                <input type="text" class="form-control" id="recoveryDeviceID" placeholder="Ingresa tu Device ID" />
-                                <small id="deviceIDHelp" class="form-text text-muted">Ingresa tu Device ID si necesitas recuperar la sesión.</small>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                         </form>
@@ -77,15 +72,11 @@
         const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
         localStorage.setItem('deviceID', deviceID);
 
-        // Si ya existe el Device ID en localStorage, mostrarlo
-        document.getElementById('recoveryDeviceID').value = deviceID;
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const cedula = document.getElementById('cedula').value;
             const password = document.getElementById('password').value;
-            const recoveryDeviceID = document.getElementById('recoveryDeviceID').value || deviceID;
 
             try {
                 const response = await fetch('/api/auth/login', {
@@ -93,7 +84,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ cedula, password, deviceID: recoveryDeviceID }),
+                    body: JSON.stringify({ cedula, password, deviceID }),
                 });
 
                 const data = await response.json();
@@ -102,7 +93,6 @@
                 if (response.ok) {
                     localStorage.setItem('cedula', cedula);
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('deviceID', recoveryDeviceID);  // Actualizar Device ID
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
                     // Redirigir a la página de registros o dashboard
                     window.location.href = '/dashboard.html';
