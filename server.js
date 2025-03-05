@@ -43,10 +43,6 @@ app.get("/api/auth/verify", verifyToken, (req, res) => {
     res.json({ message: "Token válido" });
 });
 
-// Rutas de autenticación y registros
-app.use("/api/auth", authRoutes);  // Ruta para las funciones de login, recuperación, verificación del código
-app.use("/api/registro", registroRoutes);  // Ruta para el registro de entradas/salidas
-
 // Redirigir la raíz a /login
 app.get("/", (req, res) => {
     res.redirect("/login");
@@ -66,6 +62,10 @@ app.get("/register", (req, res) => {
 app.get("/dashboard.html", verifyToken, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
+
+// Rutas de autenticación y registros
+app.use("/api/auth", authRoutes);
+app.use("/api/registro", registroRoutes);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
