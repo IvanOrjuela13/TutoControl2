@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+public/login.html <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -68,98 +68,70 @@
     </div>
 
     <script>
-        // Base de datos en IndexedDB
-        const DB_NAME = "DeviceDB";
-        const STORE_NAME = "deviceStore";
+        // Generar o obtener el Device ID
+        const deviceID = localStorage.getItem('deviceID') || 'device-' + Date.now();
+        localStorage.setItem('deviceID', deviceID);
 
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onupgradeneeded = function (event) {
-                    let db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: "id" });
-                    }
-                };
-                request.onsuccess = function (event) {
-                    resolve(event.target.result);
-                };
-                request.onerror = function () {
-                    reject("Error al abrir IndexedDB");
-                };
-            });
-        }
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        async function saveDeviceID(deviceID) {
-            const db = await openDB();
-            const tx = db.transaction(STORE_NAME, "readwrite");
-            const store = tx.objectStore(STORE_NAME);
-            store.put({ id: "deviceID", value: deviceID });
-            return tx.complete;
-        }
+            const cedula = document.getElementById('cedula').value;
+            const password = document.getElementById('password').value;
 
-        async function getDeviceID() {
-            const db = await openDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE_NAME, "readonly");
-                const store = tx.objectStore(STORE_NAME);
-                const request = store.get("deviceID");
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cedula, password, deviceID }),
+                });
 
-                request.onsuccess = function () {
-                    resolve(request.result ? request.result.value : null);
-                };
-                request.onerror = function () {
-                    reject("Error al obtener el Device ID");
-                };
-            });
-        }
+                const data = await response.json();
+                const messageDiv = document.getElementById('message');
 
-        async function checkDeviceID() {
-            let deviceID = await getDeviceID();
-            if (!deviceID) {
-                deviceID = crypto.randomUUID();
-                await saveDeviceID(deviceID);
-                console.log("Nuevo Device ID generado:", deviceID);
-            } else {
-                console.log("Device ID encontrado:", deviceID);
-            }
-            return deviceID;
-        }
-
-        document.addEventListener("DOMContentLoaded", async function () {
-            const deviceID = await checkDeviceID();
-
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const cedula = document.getElementById('cedula').value;
-                const password = document.getElementById('password').value;
-
-                try {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ cedula, password, deviceID }),
-                    });
-
-                    const data = await response.json();
-                    const messageDiv = document.getElementById('message');
-
-                    if (response.ok) {
-                        localStorage.setItem('cedula', cedula);
-                        localStorage.setItem('token', data.token);
-                        messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                        window.location.href = '/dashboard.html';
-                    } else {
-                        messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+                if (response.ok) {
+                    localStorage.setItem('cedula', cedula);
+                    localStorage.setItem('token', data.token);
+                    messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+                    // Redirigir a la página de registros o dashboard
+                    window.location.href = '/dashboard.html';
+                } else {
+                    messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+            }
+        });
+
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const cedula = document.getElementById('resetCedula').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            try {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cedula, newPassword }),
+                });
+
+                const data = await response.json();
+                const resetMessageDiv = document.getElementById('resetMessage');
+
+                if (response.ok) {
+                    resetMessageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+                } else {
+                    resetMessageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+            }
         });
     </script>
 
