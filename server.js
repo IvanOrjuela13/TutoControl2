@@ -18,7 +18,7 @@ app.use(express.json());
 // Middleware para CORS
 app.use(cors());
 
-// Middleware para servir archivos estáticos
+// Middleware para servir archivos estáticos (por ejemplo, login.html, dashboard.html)
 app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware para verificar autenticación con JWT
@@ -26,19 +26,20 @@ const verifyToken = (req, res, next) => {
     const token = req.headers.authorization;
 
     if (!token) {
-        return res.status(403).json({ message: "Acceso denegado" });
+        return res.status(403).json({ message: "Acceso denegado. No se proporcionó token." });
     }
 
     try {
+        // Eliminar el prefijo "Bearer " si está presente
         const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
+        req.user = decoded;  // Agregar los datos decodificados del token a la solicitud
+        next();  // Continuar al siguiente middleware o ruta
     } catch (err) {
-        return res.status(401).json({ message: "Token inválido" });
+        return res.status(401).json({ message: "Token inválido o expirado." });
     }
 };
 
-// Nueva ruta para verificar el token desde el frontend
+// Ruta para verificar el token desde el frontend
 app.get("/api/auth/verify", verifyToken, (req, res) => {
     res.json({ message: "Token válido" });
 });
@@ -48,22 +49,22 @@ app.get("/", (req, res) => {
     res.redirect("/login");
 });
 
-// Ruta para el archivo login.html
+// Ruta para servir login.html
 app.get("/login", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// Ruta para el archivo register.html
+// Ruta para servir register.html
 app.get("/register", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
-// Ruta protegida para dashboard.html
+// Ruta protegida para dashboard.html (solo accesible con token válido)
 app.get("/dashboard.html", verifyToken, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
 
-// Rutas de autenticación y registros
+// Usar rutas de autenticación y registros
 app.use("/api/auth", authRoutes);
 app.use("/api/registro", registroRoutes);
 
