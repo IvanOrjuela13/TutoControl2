@@ -143,7 +143,6 @@
 
     const appFirebase = initializeApp(firebaseConfig);
     const firebaseStorage = getStorage(appFirebase);
-    // Exponemos firebaseStorage para que pueda usarse en scripts normales
     window.firebaseStorage = firebaseStorage;
   </script>
 </head>
@@ -198,8 +197,8 @@
   <!-- Script principal (no módulo) -->
   <script>
     const referenceLocation = {
-      lat: 4.401664,
-      lng: -75.174785,
+      lat: 4.458647,
+      lng: -75.201274,
     };
     const maxDistance = 5000; // Distancia máxima en metros
 
@@ -283,13 +282,16 @@
       document.getElementById("capturedPhoto").src = imageData;
       stream.getTracks().forEach(track => track.stop());
 
-      // Subir la imagen a Firebase Storage
+      // Subir la imagen a Firebase Storage y mostrar mensaje en el DOM
       try {
         const downloadURL = await window.uploadImageToFirebase(imageData);
         console.log('Imagen guardada en Firebase Storage. URL:', downloadURL);
-        // Aquí podrías, por ejemplo, guardar la URL en tu base de datos o mostrarla en el DOM
+        document.getElementById('message').innerHTML = 
+          '<div class="alert alert-success">Imagen guardada correctamente en Firebase Storage.</div>';
       } catch(error) {
         console.error('Error al subir la imagen a Firebase Storage:', error);
+        document.getElementById('message').innerHTML = 
+          `<div class="alert alert-danger">Error al guardar la imagen: ${error.message}</div>`;
       }
     }
 
@@ -299,7 +301,8 @@
         const isWithinAllowedDistance = await showPosition(position);
 
         if (!isWithinAllowedDistance) {
-          document.getElementById('message').innerHTML = '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
+          document.getElementById('message').innerHTML = 
+            '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
           return;
         }
 
@@ -323,16 +326,19 @@
           }),
         });
         const data = await response.json();
-        document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
+        document.getElementById('message').innerHTML = 
+          `<div class="alert alert-info">${data.msg}</div>`;
       } catch (error) {
-        document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+        document.getElementById('message').innerHTML = 
+          `<div class="alert alert-danger">${error.message}</div>`;
       }
     }
 
     document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
     document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
     document.getElementById('logoutBtn').addEventListener('click', () => {
-      document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
+      document.getElementById('message').innerHTML = 
+        '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
       setTimeout(() => {
         window.location.href = 'login.html';
       }, 1000);
@@ -340,7 +346,8 @@
 
     // Mostrar el nombre de usuario en el dashboard
     const username = localStorage.getItem('username') || 'Usuario';
-    document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${username}! Listo para marcar tu registro con estilo. 🚀`;
+    document.getElementById('welcomeMessage').innerHTML = 
+      `🔥 ¡Bienvenido, ${username}! Listo para marcar tu registro con estilo. 🚀`;
   </script>
 
   <script>
