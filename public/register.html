@@ -18,52 +18,19 @@
                     <form id="registerForm">
                         <div class="mb-3">
                             <label for="fullName" class="form-label">Nombre Completo</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required maxlength="30">
-                            </div>
-                            <small class="text-muted">Solo se permiten letras y máximo 30 caracteres.</small>
+                            <input type="text" class="form-control" id="fullName" placeholder="Ingresa tu nombre completo" required maxlength="30">
                         </div>
                         <div class="mb-3">
                             <label for="cedula" class="form-label">Cédula</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="area" class="form-label">Área</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
-                                <select class="form-control" id="area" required>
-                                    <option value="" disabled selected>Selecciona tu área</option>
-                                    <option value="Matemáticas">Matemáticas</option>
-                                    <option value="Física">Física</option>
-                                    <option value="Química">Química</option>
-                                    <option value="Biología">Biología</option>
-                                    <option value="Ingeniería de Sistemas">Ingeniería de Sistemas</option>
-                                    <option value="Administración">Administración</option>
-                                    <option value="Derecho">Derecho</option>
-                                    <option value="Psicología">Psicología</option>
-                                    <option value="Economía">Economía</option>
-                                    <option value="Literatura">Literatura</option>
-                                </select>
-                            </div>
+                            <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Contraseña</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="10">
-                            </div>
-                            <small class="text-muted">Debe tener entre 6 y 10 caracteres, al menos una mayúscula y una minúscula.</small>
+                            <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required maxlength="10">
                         </div>
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" required maxlength="10">
-                            </div>
+                            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirma tu contraseña" required maxlength="10">
                         </div>
                         <button type="submit" class="btn btn-primary w-100 btn-lg">Registrarse</button>
                     </form>
@@ -81,7 +48,6 @@
 
             const fullName = document.getElementById('fullName').value;
             const cedula = document.getElementById('cedula').value;
-            const area = document.getElementById('area').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -91,13 +57,13 @@
                 localStorage.setItem('deviceID', deviceID);
             }
 
-            // Validación de cédula (solo números y máximo 10 caracteres)
+            // Validación de cédula
             if (!/^\d{7,10}$/.test(cedula)) {
                 alert('La cédula debe contener solo números y tener entre 7 y 10 dígitos.');
                 return;
             }
 
-            // Validación de contraseña (máximo 10 caracteres, al menos 1 mayúscula y 1 minúscula)
+            // Validación de contraseña
             if (!/^(?=.*[a-z])(?=.*[A-Z]).{6,10}$/.test(password)) {
                 alert('La contraseña debe tener entre 6 y 10 caracteres, incluir al menos una mayúscula y una minúscula.');
                 return;
@@ -112,7 +78,7 @@
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullName, cedula, area, password, deviceID }),
+                    body: JSON.stringify({ fullName, cedula, password, deviceID }),
                 });
 
                 const data = await response.json();
@@ -121,21 +87,10 @@
                 if (response.ok) {
                     window.location.href = "login.html"; 
                 }
-
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error al registrar usuario');
             }
-        });
-
-        // Evitar números y convertir a minúsculas en el campo de nombre
-        document.getElementById('fullName').addEventListener('input', function () {
-            this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').toLowerCase().slice(0, 30);
-        });
-
-        // Evitar que ingresen letras en el campo de cédula
-        document.getElementById('cedula').addEventListener('input', function () {
-            this.value = this.value.replace(/\D/g, '').slice(0, 10);
         });
     </script>
 
