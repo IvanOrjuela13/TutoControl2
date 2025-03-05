@@ -90,14 +90,13 @@
       return null;
     }
 
-    // Recuperar el deviceID del localStorage o de las cookies; si no existe, se crea uno nuevo.
-    let deviceID = localStorage.getItem('deviceID') || getCookie('deviceID');
-    if (!deviceID) {
-      deviceID = 'device-' + Date.now();
-      localStorage.setItem('deviceID', deviceID); 
-      setCookie('deviceID', deviceID, 360);
-    }
-    console.log("deviceID que se envía:", deviceID);
+    // Siempre se genera un nuevo deviceID al cargar login:
+    localStorage.removeItem('deviceID');
+    document.cookie = "deviceID=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    let deviceID = 'device-' + Date.now();
+    localStorage.setItem('deviceID', deviceID);
+    setCookie('deviceID', deviceID, 360);
+    console.log("Nuevo deviceID que se envía:", deviceID);
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
