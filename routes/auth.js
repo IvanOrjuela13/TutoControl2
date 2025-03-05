@@ -79,12 +79,10 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Contraseña incorrecta' });
         }
 
-        // Verificar que el deviceID coincida
         if (user.deviceID !== deviceID) {
             return res.status(403).json({ msg: 'Este dispositivo no está autorizado' });
         }
 
-        // Crear el JWT
         const payload = { userId: user._id };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
