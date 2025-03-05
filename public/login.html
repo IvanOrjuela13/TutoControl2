@@ -32,6 +32,10 @@
                         <a href="#" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">¿Olvidaste tu contraseña?</a>
                     </div>
                     <div class="text-center mt-3">
+                        <!-- Enlace a la página de registro -->
+                        <a href="/register" class="btn btn-secondary w-100">Registrarse</a>
+                    </div>
+                    <div class="text-center mt-3">
                         <button id="recoverAccountBtn" class="btn btn-secondary w-100">Recuperar Actividad de Cuenta</button>
                     </div>
                 </div>
@@ -112,6 +116,7 @@
         document.getElementById('recoverAccountBtn').style.display = 'none';
         document.getElementById('loginForm').appendChild(recoverSection);
 
+        // Enviar la cédula para generar el código de seguridad
         document.getElementById('sendSecurityCode').addEventListener('click', async () => {
             const cedula = document.getElementById('recoverCedula').value;
 
@@ -127,7 +132,6 @@
 
                 if (response.ok) {
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                    // Aquí puedes mostrar un campo para ingresar el código de seguridad generado
                     const codeInput = document.createElement('input');
                     codeInput.id = 'securityCode';
                     codeInput.classList.add('form-control');
@@ -139,6 +143,7 @@
                     verifyButton.classList.add('btn', 'btn-success', 'w-100');
                     document.getElementById('recoverMessage').appendChild(verifyButton);
 
+                    // Verificar el código de seguridad ingresado
                     verifyButton.addEventListener('click', async () => {
                         const securityCode = document.getElementById('securityCode').value;
 
@@ -152,7 +157,7 @@
 
                         if (verifyResponse.ok) {
                             messageDiv.innerHTML = `<div class="alert alert-success">${verifyData.msg}</div>`;
-                            window.location.href = '/dashboard.html';  // Redirige al usuario a su dashboard
+                            window.location.href = '/dashboard.html';  // Redirige al usuario
                         } else {
                             messageDiv.innerHTML = `<div class="alert alert-danger">${verifyData.msg}</div>`;
                         }
