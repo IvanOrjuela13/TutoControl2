@@ -27,7 +27,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="deviceID" class="form-label">Device ID</label>
-                                <input type="text" class="form-control" id="deviceID" placeholder="Tu Device ID se generará automáticamente" required>
+                                <input type="text" class="form-control" id="deviceID" readonly>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                         </form>
@@ -72,13 +72,10 @@
     </div>
 
     <script>
-        // Obtener o generar Device ID
+        // Generar o recuperar Device ID automáticamente sin prompt
         let storedDeviceID = localStorage.getItem('deviceID');
         if (!storedDeviceID) {
-            storedDeviceID = prompt("Introduce tu Device ID o deja en blanco para generar uno automáticamente:");
-            if (!storedDeviceID) {
-                storedDeviceID = 'device-' + Date.now();
-            }
+            storedDeviceID = 'device-' + Date.now();
             localStorage.setItem('deviceID', storedDeviceID);
         }
         document.getElementById('deviceID').value = storedDeviceID;
