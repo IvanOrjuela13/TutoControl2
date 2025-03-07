@@ -26,8 +26,10 @@
                                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
                             </div>
                             <div class="mb-3">
-                                <label for="deviceID" class="form-label">Device ID</label>
-                                <input type="text" class="form-control" id="deviceID" readonly>
+                                <label for="deviceID" class="form-label">
+                                    Recupera tu cuenta de inicio de sesión si no te deja con tu Device ID
+                                </label>
+                                <input type="text" class="form-control" id="deviceID" placeholder="Tu Device ID se generará automáticamente">
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                         </form>
@@ -72,7 +74,7 @@
     </div>
 
     <script>
-        // Generar o recuperar Device ID automáticamente sin prompt
+        // Obtener o generar Device ID
         let storedDeviceID = localStorage.getItem('deviceID');
         if (!storedDeviceID) {
             storedDeviceID = 'device-' + Date.now();
