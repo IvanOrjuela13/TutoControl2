@@ -3,326 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f0f2f5;
-        }
-        .container {
-            max-width: 500px;
-            margin: auto;
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
-        }
-        .container:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        h2 {
-            color: #343a40;
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-        .btn {
-            border-radius: 20px;
-            padding: 10px 20px;
-            font-size: 14px;
-            margin: 10px 0;
-            width: 100%;
-            transition: transform 0.2s;
-        }
-        .btn:hover {
-            transform: scale(1.05);
-        }
-        #locationDisplay {
-            margin-top: 15px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #e9ecef;
-            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        #locationDisplay h5 {
-            color: #343a40;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        #location {
-            font-size: 16px;
-            color: #555;
-        }
-        #timestamp {
-            font-size: 14px;
-            color: #777;
-        }
-        #message {
-            margin-top: 15px;
-        }
-        #photo {
-            margin-top: 15px;
-            text-align: center;
-        }
-        #photo img {
-            border-radius: 10px;
-            max-width: 48%; /* Ajustamos el tamaño de la imagen */
-            height: auto;
-        }
-        #photoTitle {
-            font-family: 'Poppins', sans-serif;
-            font-size: 15px;
-            color: #333; /* Un negro más suave */
-            font-weight: 600;
-            text-align: center;
-            letter-spacing: 1.2px; /* Un poco más de espaciado */
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15); /* Sombra más difusa */
-        }
-        #capturedPhoto {
-            display: block;
-            margin: 0 auto;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-        }
-    </style>
-    <style>
-        /* Botón de Registro de Entrada */
-        #entradaBtn {
-            background: linear-gradient(45deg, #007bff, #0056b3);
-            color: white;
-            border: none;
-            transition: all 0.3s ease-in-out;
-        }
-        #entradaBtn:hover {
-            background: linear-gradient(45deg, #0056b3, #003d82);
-            transform: scale(1.05);
-        }
-        /* Botón de Registro de Salida */
-        #salidaBtn {
-            background: linear-gradient(45deg, #dc3545, #a71d2a);
-            color: white;
-            border: none;
-            transition: all 0.3s ease-in-out;
-        }
-        #salidaBtn:hover {
-            background: linear-gradient(45deg, #a71d2a, #721622);
-            transform: scale(1.05);
-        }
-        /* Botón de Cerrar Sesión */
-        #logoutBtn {
-            background: linear-gradient(45deg, #ff8800, #cc6d00);
-            color: white;
-            border: none;
-            transition: all 0.3s ease-in-out;
-        }
-        #logoutBtn:hover {
-            background: linear-gradient(45deg, #cc6d00, #995200);
-            transform: scale(1.05);
-        }
-    </style>
+    <title>Inicio de Usuario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
-<body>
+<body class="bg-light">
     <div class="container mt-5">
-        <h2 class="text-center" id="welcomeMessage"></h2>
-        <div class="text-center">
-            <button id="entradaBtn" class="btn btn-success"><i class="fas fa-sign-in-alt"></i> Registro de Entrada</button>
-            <button id="salidaBtn" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Registro de Salida</button>
-            <button id="logoutBtn" class="btn btn-warning"><i class="fas fa-power-off"></i> Cerrar Sesión</button>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header text-center bg-primary text-white">
+                        <h3>Iniciar Sesión</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="cedula" class="form-label">Cédula</label>
+                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                        </form>
+                        <div id="message" class="mt-3"></div>
+                        <div class="text-center mt-2">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">¿Olvidaste tu contraseña?</a>
+                        </div>
+                        <div class="text-center mt-2">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#recoverAccessModal">Recuperar acceso</a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p>¿No tienes una cuenta? <a href="register.html">Regístrate aquí</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div id="locationDisplay" class="mt-3" style="background-color: #dff9fb; border-left: 5px solid #0984e3; padding: 15px; border-radius: 10px; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); text-align: center;">
-            <h5 style="color: #0984e3; font-size: 20px;">📍 Ubicación Actual:</h5>
-            <p id="location" style="font-size: 16px; color: #2d3436;">Latitud: <span id="latitude">-</span>, Longitud: <span id="longitude">-</span></p>
-            <p id="timestamp" style="font-size: 14px; color: #636e72;">📅 Fecha y Hora: <span id="dateTime">-</span></p>
-        </div>
-        
-        <div id="photo">
-            <h5 id="photoTitle">📸 Evidencia En Progreso,No Se Mueva...</h5>
-            <img id="capturedPhoto" />
-        </div> 
-        <script>
-            function mostrarError() {
-                document.getElementById("errorMsg").style.display = "block";
-            }
-        </script>
-        <div id="message" class="mt-3"></div>
     </div>
-
-    <script>
-        const referenceLocation = {
-            lat:  4.410573,
-            lng: -75.153408,
-        };
-        const maxDistance = 5000; // Distancia máxima en metros
-
-        const videoElement = document.createElement("video");
-
-        // Suponiendo que estas variables contienen los valores del usuario autenticado
-        const userName = 'Ivan'; // Reemplaza con la variable que contiene el nombre del usuario
-        const userID = '678d2aee2ec1cbd8499dc892'; // Reemplaza con la variable que contiene el ID del usuario
-
-        async function getLocation() {
-            if (navigator.geolocation) {
-                return new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
-                });
-            } else {
-                throw new Error("La geolocalización no es soportada por este navegador.");
-            }
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * (Math.PI / 180);
-            const dLon = (lon2 - lon1) * (Math.PI / 180);
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const distance = R * c * 1000; // Convertir a metros
-            return distance;
-        }
-
-        async function showPosition(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            const distance = calculateDistance(lat, lng, referenceLocation.lat, referenceLocation.lng);
-
-            document.getElementById('latitude').textContent = lat.toFixed(6);
-            document.getElementById('longitude').textContent = lng.toFixed(6);
-            document.getElementById('dateTime').textContent = new Date().toLocaleString();
-
-            return distance <= maxDistance;
-        }
     
-        async function capturePhoto() {
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoElement.srcObject = stream;
-            videoElement.play();
-
-            await new Promise(resolve => videoElement.onloadedmetadata = resolve);
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-
-            context.drawImage(videoElement, 0, 0);
-
-            // Obtener datos desde localStorage
-            const deviceID = localStorage.getItem('deviceID') || 'ID Desconocido';
-            const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
-
-            // Obtener fecha, hora y ubicación actual
-            const dateTime = new Date().toLocaleString();
-            const lat = document.getElementById('latitude').textContent;
-            const lng = document.getElementById('longitude').textContent;
-            const location = `Lat: ${lat}, Lng: ${lng}`;
-
-            // Establecer la posición de inicio más arriba y ajustar el espaciado
-            const startY = canvas.height - 120;  // Posición inicial más arriba, alejada del borde inferior
-            const lineSpacing = 25;  // Reducir el espacio entre líneas de texto
-
-            context.font = '20px Arial';
-            context.fillStyle = 'white';
-
-            // Imprimir las líneas con el nuevo espaciado y posición
-            context.fillText(`ID: ${deviceID}`, 10, startY);
-            context.fillText(`Cédula: ${cedula}`, 10, startY + lineSpacing);
-            context.fillText(`Fecha: ${dateTime}`, 10, startY + 2 * lineSpacing);
-            context.fillText(`Ubicación: ${location}`, 10, startY + 3 * lineSpacing);
-
-            const imageData = canvas.toDataURL("image/png");
-
-            document.getElementById("capturedPhoto").src = imageData;
-            stream.getTracks().forEach(track => track.stop());
-        }
-
-        async function handleRegister(endpoint) {
+    <!-- Modal para restablecer contraseña -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetPasswordModalLabel">Restablecer Contraseña</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="resetPasswordForm">
+                        <div class="mb-3">
+                            <label for="resetCedula" class="form-label">Cédula</label>
+                            <input type="text" class="form-control" id="resetCedula" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Actualizar Contraseña</button>
+                    </form>
+                    <div id="resetMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para recuperar acceso -->
+    <div class="modal fade" id="recoverAccessModal" tabindex="-1" aria-labelledby="recoverAccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recoverAccessModalLabel">Recuperar Acceso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recoverAccessForm">
+                        <div class="mb-3">
+                            <label for="recoverDeviceID" class="form-label">Device ID</label>
+                            <input type="text" class="form-control" id="recoverDeviceID" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Validar</button>
+                    </form>
+                    <div id="recoverMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('recoverAccessForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const deviceID = document.getElementById('recoverDeviceID').value;
             try {
-                const position = await getLocation();
-                const isWithinAllowedDistance = await showPosition(position);
-
-                if (!isWithinAllowedDistance) {
-                    document.getElementById('message').innerHTML = '<div class="alert alert-danger">Debe acercarse a la ubicación permitida para realizar el registro.</div>';
-                    return;
-                }
-
-                await capturePhoto();
-
-                const userId = userID; // Utilizamos el ID del usuario
-                const deviceID = localStorage.getItem('deviceID');
-                const cedula = localStorage.getItem('cedula') || 'Cédula No Disponible';
-
-                const response = await fetch(endpoint, {
+                const response = await fetch('/api/auth/validate-device', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        userId, 
-                        deviceID, 
-                        cedula, 
-                        ubicacion: { 
-                            lat: position.coords.latitude, 
-                            lng: position.coords.longitude 
-                        } 
-                    }),
+                    body: JSON.stringify({ deviceID })
                 });
                 const data = await response.json();
-                document.getElementById('message').innerHTML = `<div class="alert alert-info">${data.msg}</div>`;
+                if (response.ok) {
+                    localStorage.setItem('deviceID', deviceID);
+                    document.getElementById('recoverMessage').innerHTML = `<div class="alert alert-success">Acceso Restablecido</div>`;
+                } else {
+                    document.getElementById('recoverMessage').innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
+                }
             } catch (error) {
-                document.getElementById('message').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
-            }
-        }
-
-        document.getElementById('entradaBtn').addEventListener('click', () => handleRegister('/api/registro/entrada'));
-        document.getElementById('salidaBtn').addEventListener('click', () => handleRegister('/api/registro/salida'));
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            // Mostrar el mensaje de cierre de sesión
-            document.getElementById('message').innerHTML = '<div class="alert alert-success">Sesión cerrada con éxito.</div>';
-            
-            // Redirigir a la página de login
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1000); // La redirección ocurrirá después de 1 segundo para dar tiempo al mensaje
-        });
-
-        // Obtener el nombre del usuario desde localStorage o usar un valor por defecto
-        const username = localStorage.getItem('username') || 'Usuario';
-        document.getElementById('welcomeMessage').innerHTML = `🔥 ¡Bienvenido, ${username}! Listo para marcar tu registro con estilo. 🚀`;
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                // Si no hay token, redirigir a login
-                window.location.href = "/login";
-            } else {
-                // Verificar el token con el servidor
-                fetch("/api/auth/verify", {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Token inválido o expirado");
-                    }
-                })
-                .catch(() => {
-                    localStorage.removeItem("token"); // Borrar token inválido
-                    window.location.href = "/login"; // Redirigir a login
-                });
+                document.getElementById('recoverMessage').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
             }
         });
     </script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
