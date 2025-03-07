@@ -26,10 +26,8 @@
                                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
                             </div>
                             <div class="mb-3">
-                                <label for="deviceID" class="form-label">
-                                    Recupera tu cuenta de inicio de sesión si no te deja con tu Device ID
-                                </label>
-                                <input type="text" class="form-control" id="deviceID" placeholder="Tu Device ID se generará automáticamente">
+                                <label for="deviceID" class="form-label">Recupera tu cuenta de inicio de sesión si no te deja con tu Device ID</label>
+                                <input type="text" class="form-control" id="deviceID" placeholder="Ingresa tu Device ID si es necesario">
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                         </form>
@@ -74,20 +72,12 @@
     </div>
 
     <script>
-        // Obtener o generar Device ID
-        let storedDeviceID = localStorage.getItem('deviceID');
-        if (!storedDeviceID) {
-            storedDeviceID = 'device-' + Date.now();
-            localStorage.setItem('deviceID', storedDeviceID);
-        }
-        document.getElementById('deviceID').value = storedDeviceID;
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const cedula = document.getElementById('cedula').value;
             const password = document.getElementById('password').value;
-            const deviceID = document.getElementById('deviceID').value;
+            const deviceID = document.getElementById('deviceID').value || null; // Permitir que sea opcional
 
             try {
                 const response = await fetch('/api/auth/login', {
@@ -104,7 +94,7 @@
                 if (response.ok) {
                     localStorage.setItem('cedula', cedula);
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('deviceID', deviceID); // Guardar Device ID actualizado
+                    if (deviceID) localStorage.setItem('deviceID', deviceID); // Guardar solo si se proporciona
                     messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
                     window.location.href = '/dashboard.html';
                 } else {
