@@ -25,6 +25,10 @@
                                 <label for="password" class="form-label">Contraseña</label>
                                 <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="deviceID" class="form-label">Device ID</label>
+                                <input type="text" class="form-control" id="deviceID" placeholder="Tu Device ID se generará automáticamente" required>
+                            </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                         </form>
                         <div id="message" class="mt-3"></div>
@@ -40,25 +44,6 @@
         </div>
     </div>
 
-    <!-- Modal para ingresar Device ID -->
-    <div class="modal fade" id="deviceIdModal" tabindex="-1" aria-labelledby="deviceIdModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deviceIdModalLabel">Verificación de Dispositivo</h5>
-                </div>
-                <div class="modal-body">
-                    <p>Ingresa tu Device ID para continuar.</p>
-                    <input type="text" id="inputDeviceID" class="form-control" placeholder="Ingrese su Device ID" required>
-                    <div id="deviceMessage" class="mt-2 text-danger"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="verifyDevice">Verificar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal para restablecer contraseña -->
     <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -68,14 +53,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
+                    <p>Ingresa tu cédula y una nueva contraseña.</p>
                     <form id="resetPasswordForm">
                         <div class="mb-3">
                             <label for="resetCedula" class="form-label">Cédula</label>
-                            <input type="text" class="form-control" id="resetCedula" required>
+                            <input type="text" class="form-control" id="resetCedula" placeholder="Ingresa tu cédula" required>
                         </div>
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="newPassword" required>
+                            <input type="password" class="form-control" id="newPassword" placeholder="Ingresa tu nueva contraseña" required>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Actualizar Contraseña</button>
                     </form>
@@ -86,75 +72,78 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Mostrar modal de Device ID al cargar la página
-            const deviceIdModal = new bootstrap.Modal(document.getElementById('deviceIdModal'));
-            deviceIdModal.show();
+        // Obtener o generar Device ID
+        let storedDeviceID = localStorage.getItem('deviceID');
+        if (!storedDeviceID) {
+            storedDeviceID = prompt("Introduce tu Device ID o deja en blanco para generar uno automáticamente:");
+            if (!storedDeviceID) {
+                storedDeviceID = 'device-' + Date.now();
+            }
+            localStorage.setItem('deviceID', storedDeviceID);
+        }
+        document.getElementById('deviceID').value = storedDeviceID;
 
-            document.getElementById('verifyDevice').addEventListener('click', async () => {
-                const inputDeviceID = document.getElementById('inputDeviceID').value;
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-                if (!inputDeviceID) {
-                    document.getElementById('deviceMessage').innerText = "Por favor, ingresa tu Device ID.";
-                    return;
+            const cedula = document.getElementById('cedula').value;
+            const password = document.getElementById('password').value;
+            const deviceID = document.getElementById('deviceID').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cedula, password, deviceID }),
+                });
+
+                const data = await response.json();
+                const messageDiv = document.getElementById('message');
+
+                if (response.ok) {
+                    localStorage.setItem('cedula', cedula);
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('deviceID', deviceID); // Guardar Device ID actualizado
+                    messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+                    window.location.href = '/dashboard.html';
+                } else {
+                    messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+            }
+        });
 
-                try {
-                    const response = await fetch('/api/auth/verify-device', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ deviceID: inputDeviceID }),
-                    });
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-                    const data = await response.json();
+            const cedula = document.getElementById('resetCedula').value;
+            const newPassword = document.getElementById('newPassword').value;
 
-                    if (response.ok) {
-                        localStorage.setItem('deviceID', inputDeviceID);
-                        deviceIdModal.hide();
-                    } else {
-                        document.getElementById('deviceMessage').innerText = data.msg;
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    document.getElementById('deviceMessage').innerText = "Error en el servidor.";
+            try {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ cedula, newPassword }),
+                });
+
+                const data = await response.json();
+                const resetMessageDiv = document.getElementById('resetMessage');
+
+                if (response.ok) {
+                    resetMessageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
+                } else {
+                    resetMessageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
                 }
-            });
-
-            document.getElementById('loginForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const cedula = document.getElementById('cedula').value;
-                const password = document.getElementById('password').value;
-                const deviceID = localStorage.getItem('deviceID');
-
-                if (!deviceID) {
-                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error: No se verificó el Device ID.</div>`;
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ cedula, password, deviceID }),
-                    });
-
-                    const data = await response.json();
-                    const messageDiv = document.getElementById('message');
-
-                    if (response.ok) {
-                        localStorage.setItem('cedula', cedula);
-                        localStorage.setItem('token', data.token);
-                        messageDiv.innerHTML = `<div class="alert alert-success">${data.msg}</div>`;
-                        window.location.href = '/dashboard.html';
-                    } else {
-                        messageDiv.innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
-                }
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('resetMessage').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+            }
         });
     </script>
 
