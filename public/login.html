@@ -74,13 +74,15 @@
     </div>
 
     <script>
+        
         // Obtener o generar Device ID
-       let storedDeviceID = localStorage.getItem('deviceID');
-if (!storedDeviceID) {
-    storedDeviceID = 'dev-' + Math.floor(10 + Math.random() * 90); // Genera un número entre 10 y 99
-    localStorage.setItem('deviceID', storedDeviceID);
-}
-document.getElementById('deviceID').value = storedDeviceID;
+        let storedDeviceID = localStorage.getItem('deviceID');
+        if (!storedDeviceID) {
+        storedDeviceID = Math.floor(10 + Math.random() * 90); // Genera un número entre 10 y 99
+        localStorage.setItem('deviceID', storedDeviceID);
+        }
+        document.getElementById('deviceID').value = storedDeviceID;
+
 
 
 
