@@ -85,11 +85,12 @@
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
-            let deviceID = localStorage.getItem('deviceID');
-            if (!deviceID) {
-                deviceID = 'device-' + Date.now();
-                localStorage.setItem('deviceID', deviceID);
-            }
+           let deviceID = localStorage.getItem('deviceID');
+if (!deviceID) {
+    deviceID = 'dev-' + Math.floor(10 + Math.random() * 90); // Genera un número entre 10 y 99
+    localStorage.setItem('deviceID', deviceID);
+}
+
 
             // Validación de cédula (solo números y máximo 10 caracteres)
             if (!/^\d{7,10}$/.test(cedula)) {
