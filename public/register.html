@@ -87,9 +87,10 @@
             
             let deviceID = localStorage.getItem('deviceID');
             if (!deviceID) {
-                deviceID = 'dev-' + Date.now().toString().slice(-6);
-                localStorage.setItem('deviceID', deviceID);
-            }
+    deviceID = 'dev-' + Math.random().toString(36).substr(2, 6);
+    localStorage.setItem('deviceID', deviceID);
+}
+
 
             // Validación de cédula (solo números y máximo 10 caracteres)
             if (!/^\d{7,10}$/.test(cedula)) {
