@@ -87,7 +87,7 @@
             
             let deviceID = localStorage.getItem('deviceID');
             if (!deviceID) {
-                deviceID = 'device-' + Date.now();
+                deviceID = 'dev-' + Date.now().toString().slice(-6);
                 localStorage.setItem('deviceID', deviceID);
             }
 
