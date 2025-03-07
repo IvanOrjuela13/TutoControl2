@@ -91,6 +91,32 @@
     </div>
     
     <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const cedula = document.getElementById('cedula').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cedula, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token); // Guardar token en localStorage
+                    window.location.href = "dashboard.html"; // Redirigir a dashboard
+                } else {
+                    document.getElementById('message').innerHTML = `<div class="alert alert-danger">${data.msg}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error en el servidor</div>`;
+            }
+        });
+
         document.getElementById('recoverAccessForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const deviceID = document.getElementById('recoverDeviceID').value;
