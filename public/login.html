@@ -19,17 +19,17 @@
                         <form id="loginForm">
                             <div class="mb-3">
                                 <label for="cedula" class="form-label">Cédula</label>
-                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" required>
+                                <input type="text" class="form-control" id="cedula" placeholder="Ingresa tu cédula" maxlength="10 required>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" required>
+                                <input type="password" class="form-control" id="password" placeholder="Ingresa tu contraseña" maxlength="10 required>
                             </div>
                             <div class="mb-3">
                                 <label for="deviceID" class="form-label">
                                     Tu Device ID es tu pase de entrada. Recuérdalo, porque siempre lo necesitarás.
                                 </label>
-                                <input type="text" class="form-control" id="deviceID" placeholder="Tu Device ID se generará automáticamente">
+                                <input type="text" class="form-control" id="deviceID" placeholder="Tu Device ID se generará automáticamente" maxlength="2" >
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
                         </form>
