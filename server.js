@@ -5,8 +5,6 @@ const registroRoutes = require("./routes/registro");
 const path = require("path");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const fs = require("fs");
-
 require("dotenv").config();
 
 const app = express();
@@ -15,19 +13,10 @@ const app = express();
 connectDB();
 
 // Middleware para JSON
-app.use(express.json({ limit: "10mb" })); // Aumentar el límite para imágenes
+app.use(express.json());
 
 // Middleware para CORS
 app.use(cors());
-
-// 📂 Crear la carpeta 'uploads' si no existe
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Servir imágenes de la carpeta 'uploads'
-app.use("/uploads", express.static(uploadDir));
 
 // Middleware para servir archivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
@@ -59,15 +48,17 @@ app.get("/", (req, res) => {
     res.redirect("/login");
 });
 
-// Ruta para los archivos HTML
+// Ruta para el archivo login.html
 app.get("/login", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
+// Ruta para el archivo register.html
 app.get("/register", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "register.html"));
 });
 
+// Ruta protegida para dashboard.html
 app.get("/dashboard.html", verifyToken, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "dashboard.html"));
 });
@@ -78,4 +69,4 @@ app.use("/api/registro", registroRoutes);
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en el puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
